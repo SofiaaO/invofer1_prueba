@@ -30,7 +30,7 @@ def listar_compras(request):
     if fecha:
         compras = compras.filter(fecha_compra__date=fecha)
 
-    return render(request, 'compras/compras_list.html', {'compras': compras})
+    return render(request, 'Compras/compras_list.html', {'compras': compras})
 
 def nueva_compra(request):
     if 'carrito_compras' not in request.session:

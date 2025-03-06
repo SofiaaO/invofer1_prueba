@@ -53,7 +53,7 @@ def nueva_venta(request):
 
     current_date = timezone.now().strftime('%d-%m-%Y') 
 
-    return render(request, 'ventas/ventas.html', {
+    return render(request, 'Ventas/ventas.html', {
         'presentaciones': presentaciones,
         'carrito': carrito,
         'total': total,
