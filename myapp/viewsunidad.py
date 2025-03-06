@@ -38,7 +38,7 @@ def gestionar_unidades(request, id=None):
         else:
             form = UnidadMedidaForm()
 
-    return render(request, 'unidades/unidades_list.html', {
+    return render(request, 'Unidades/unidades_list.html', {
         'unidades': unidades,
         'form': form,
     })

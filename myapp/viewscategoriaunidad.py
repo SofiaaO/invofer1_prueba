@@ -27,7 +27,7 @@ def gestionar_categoria_unidades(request):
 
     categorias_unidades = CategoriaUnidadMedida.objects.select_related('categoria', 'unidad_medida').all()
 
-    return render(request, "Categoria_unidad/categorias_unidades.html", {
+    return render(request, "categoria_unidad/categorias_unidades.html", {
         "form": form,
         "categorias_unidades": categorias_unidades,
     })

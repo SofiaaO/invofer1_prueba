@@ -31,7 +31,7 @@ def listar_ventas(request):
     if fecha:
         ventas = ventas.filter(fecha_venta__date=fecha)
 
-    return render(request, 'ventas/ventas_list.html', {'ventas': ventas})
+    return render(request, 'Ventas/ventas_list.html', {'ventas': ventas})
 
 # REGISTRAR NUEVA VENTA
 def nueva_venta(request):

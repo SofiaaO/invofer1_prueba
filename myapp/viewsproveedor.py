@@ -20,7 +20,7 @@ def listar_proveedores(request):
     page_number = request.GET.get('page')
     proveedores = paginator.get_page(page_number)
 
-    return render(request, 'proveedores/proveedores_list.html', {'proveedores': proveedores})
+    return render(request, 'Proveedores/proveedores_list.html', {'proveedores': proveedores})
 
 def Crear_Proveedor(request):
     if request.method == 'POST':

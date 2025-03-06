@@ -32,7 +32,7 @@ def gestionar_categorias(request, id=None):
         else:
             form = CategoriaForm()
 
-    return render(request, 'categorias/categorias_list.html', {
+    return render(request, 'Categorias/categorias_list.html', {
         'categorias': categorias,
         'form': form,
     })

@@ -36,7 +36,7 @@ def gestionar_marcas(request, id=None):
         else:
             form = MarcaForm()
 
-    return render(request, 'marcas/marcas_list.html', {
+    return render(request, 'Marcas/marcas_list.html', {
         'marcas': marcas,
         'form': form,
     })

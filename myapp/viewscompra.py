@@ -47,7 +47,7 @@ def nueva_compra(request):
     numero_factura = str(int(last_number) + 1).zfill(6) if last_number else '000001'
 
     current_date = timezone.now().strftime('%d-%m-%Y')
-    return render(request, 'compras/compras.html', {
+    return render(request, 'Compras/compras.html', {
         'presentaciones': presentaciones,
         'carrito': carrito,
         'total': total,

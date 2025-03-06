@@ -68,7 +68,7 @@ def listar_movimientos(request):
         form_movimiento = MovimientoForm()
         form_detalle = DetalleMovimientoForm()
 
-    return render(request, 'movimientos/listar_movimientos.html', {
+    return render(request, 'Movimientos/listar_movimientos.html', {
         'movimientos': movimientos,  
         'form_movimiento': form_movimiento,
         'form_detalle': form_detalle,

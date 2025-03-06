@@ -19,7 +19,7 @@ def listar_clientes(request):
     page_number = request.GET.get('page')
     clientes = paginator.get_page(page_number)
 
-    return render(request, 'clientes/clientes_list.html', {'clientes': clientes})
+    return render(request, 'Clientes/clientes_list.html', {'clientes': clientes})
 
 def Crear_Clientes2(request):
     if request.method == 'POST':
