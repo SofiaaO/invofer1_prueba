@@ -1,0 +1,73 @@
+{% extends 'core/base.html' %}
+{% block title %}Crear Usuario{% endblock %}
+
+{% block content %}
+    <div class="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+        <h2 class="text-2xl font-semibold mb-4 text-center">Crear usuario</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} text-white p-4 mb-4 rounded-lg">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div>
+                {% for field in form %}
+                    <div class="mb-4">
+                        {% if field.name == 'nombre_usuario' %}
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">Nombre de Usuario</label>
+                            <div class="mt-1">
+                                <input type="{{ field.type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none bg-gray-100"
+                                    value="{{ field.value|default_if_none:'' }}" />
+                            </div>
+                        {% elif field.name == 'correo' %}
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">Correo</label>
+                            <div class="mt-1">
+                                <input type="{{ field.type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none bg-gray-100"
+                                    value="{{ field.value|default_if_none:'' }}" />
+                            </div>
+                        {% elif field.name == 'password1' %}
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                            <div class="mt-1">
+                                <input type="{{ field.type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none bg-gray-100"
+                                    value="{{ field.value|default_if_none:'' }}" />
+                            </div>
+                        {% elif field.name == 'password2' %}
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">Confirmación de contraseña</label>
+                            <div class="mt-1">
+                                <input type="{{ field.type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none bg-gray-100"
+                                    value="{{ field.value|default_if_none:'' }}" />
+                            </div>
+                        {% else %}
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                            <div class="mt-1">
+                                <input type="{{ field.type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none bg-gray-100"
+                                    value="{{ field.value|default_if_none:'' }}" />
+                            </div>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <p class="text-xs text-gray-400">{{ field.help_text }}</p>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <p class="text-red-500 text-xs">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="flex justify-between mt-6">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Volver</a>
+                <button type="submit" class="btn btn-primary">Crear Usuario</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Lista de Compras{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+    <h2 class="text-4xl font-bold mb-6 mt-6 text-gray-800">Lista de Compras</h2>
+
+    <div class="flex justify-between items-center mb-6">
+        <form method="GET" action="" class="flex">
+            <input 
+                type="text" 
+                name="buscar" 
+                placeholder="Buscar compra por número de factura o proveedor..." 
+                class="w-72 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:outline-none"
+                value="{{ request.GET.buscar|default:'' }}"
+            >
+            <input 
+                type="date" 
+                name="fecha" 
+                class="ml-4 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:outline-none"
+                value="{{ request.GET.fecha|default:'' }}"
+            >
+            <button 
+                type="submit" 
+                class="ml-4 bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500"
+            ><i class="fa-solid fa-magnifying-glass fa-lg"></i>
+            </button>
+        </form>
+        {% if perms.myapp.add_compras %}
+            <button 
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 focus:ring-2 focus:ring-blue-400"
+                onclick="window.location.href='{% url 'nueva_compra' %}'"
+            >
+            <i class="fa-solid fa-plus"></i> Nueva Compra
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="overflow-x-auto shadow-md sm:rounded-lg">
+        {% if compras %}
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="py-3 px-6 text-left">Compra Nº</th>
+                        <th class="py-3 px-6 text-left">Proveedor</th>
+                        <th class="py-3 px-6 text-left">Fecha</th>
+                        <th class="py-3 px-6 text-left">Total</th>
+                        <th class="py-3 px-6 text-left">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for compra in compras %}
+                    <tr>
+                        <td class="py-3 px-6">{{ compra.numero_factura }}</td>
+                        <td class="py-3 px-6">{{ compra.proveedor.nombre }}</td>
+                        <td class="py-3 px-6">{{ compra.fecha_compra|date:"d/m/Y H:i" }}</td>
+                        <td class="py-3 px-6">${{ compra.total }}</td>
+                        <td class="py-3 px-6">
+                            <div class="flex space-x-2">
+                                <button class="bg-yellow-600 text-white px-2 py-2 rounded-lg hover:bg-yellow-500"
+                                    onclick="openModal({{ compra.id_compra }})">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                {% if perms.myapp.change_compras%}
+                                    <button 
+                                        class="bg-gray-800 text-white px-2 py-2 rounded-lg hover:bg-gray-900 focus:ring-2 focus:ring-white"
+                                        onclick=""
+                                    >
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                {% endif %}
+                                <button 
+                                    class="bg-red-500 text-white px-2 py-2 text-sm rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-400"
+                                    onclick=""
+                                ><i class="fa-solid fa-file-invoice-dollar fa-lg"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-gray-600 text-center">No hay compras registradas.</p>
+        {% endif %}
+        <div id="detalleCompraModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center">
+            <div class="bg-white w-1/2 p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-bold mb-4">Detalles de la Compra</h3>
+                <div id="detalleCompraContent">
+                    <!-- Los detalles de la venta se cargarán aquí -->
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button onclick="closeModal()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal(id_compra) {
+        fetch(`/compras/detalle/${id_compra}/`)
+            .then(response => response.json())
+            .then(data => {
+                const content = document.getElementById('detalleCompraContent');
+                content.innerHTML = `
+                    <p><strong>Factura Nº:</strong> ${data.numero_factura}</p>
+                    <p><strong>Proveedor:</strong> ${data.proveedor}</p>
+                    <p><strong>Fecha:</strong> ${data.fecha_compra}</p>
+                    <p><strong>Total:</strong> $${data.total}</p>
+                    <table class="min-w-full bg-white border border-gray-200 mt-4">
+                        <thead class="bg-gray-800 text-white">
+                            <tr>
+                                <th class="py-3 px-6 text-left">Presentación</th>
+                                <th class="py-3 px-6 text-left">Cantidad</th>
+                                <th class="py-3 px-6 text-left">Precio Unitario</th>
+                                <th class="py-3 px-6 text-left">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.detalles.map(detalle => `
+                                <tr>
+                                    <td class="py-3 px-6">${detalle.presentacion}</td>
+                                    <td class="py-3 px-6">${detalle.cantidad}</td>
+                                    <td class="py-3 px-6">$${detalle.precio_unitario}</td>
+                                    <td class="py-3 px-6">$${detalle.subtotal}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('detalleCompraModal').classList.remove('hidden');
+                document.getElementById('detalleCompraModal').classList.add('flex');
+            });
+    }
+
+    function closeModal() {
+        document.getElementById('detalleCompraModal').classList.remove('flex');
+        document.getElementById('detalleCompraModal').classList.add('hidden');
+    }
+</script>
+
+{% endblock %}

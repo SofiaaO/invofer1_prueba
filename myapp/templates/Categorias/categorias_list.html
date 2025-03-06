@@ -1,0 +1,223 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Lista de Categorías{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+    {% if messages %}
+        <div id="messages-container" class="fixed top-21 right-11 space-y-2">
+            {% for message in messages %}
+                <div class="message {% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} text-white p-4 mb-4 rounded-lg shadow-lg transition-opacity duration-500">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="text-4xl font-bold mb-6 mt-6 text-gray-800">Lista de Categorías</h2>
+
+    <div class="flex justify-between items-center mb-6">
+        <form method="GET" action="" class="flex">
+            <input 
+                type="text" 
+                name="buscar" 
+                placeholder="Buscar categoría por nombre..." 
+                class="w-72 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:outline-none"
+                value="{{ request.GET.buscar|default:'' }}"
+            >
+            <button 
+                type="submit" 
+                class="ml-4 bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500"
+            ><i class="fa-solid fa-magnifying-glass fa-lg"></i>
+            </button>
+        </form>
+        {% if perms.myapp.add_categoria %}
+            <button 
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 focus:ring-2 focus:ring-blue-400"
+                onclick="openModalNuevaCategoria()"
+            >
+            <i class="fa-solid fa-plus"></i> Crear Categoría
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="overflow-x-auto shadow-md sm:rounded-lg">
+        {% if categorias %}
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="py-3 px-6 text-left">Nombre</th>
+                        <th class="py-3 px-6 text-left">Estado</th>
+                        {% if perms.myapp.change_categoria %}
+                            <th class="py-3 px-6 text-left">Acciones</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700 text-sm">
+                    {% for categoria in categorias %}
+                        <tr class="border-b hover:bg-gray-100">
+                            <td class="py-3 px-6">{{ categoria.nombre }}</td>
+                            <td class="py-3 px-6">
+                                {% if categoria.estado %}
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Activo</span>
+                                {% else %}
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            {% if perms.myapp.change_categoria %}
+                                <td class="py-3 px-6">
+                                    <button 
+                                        class="bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-900 focus:ring-2 focus:ring-white"
+                                        onclick="openModalEditarCategoria('{{ categoria.id }}')"
+                                    >
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                </td>
+                            {% endif %}
+                        </tr>
+                
+                        <div id="modalEditarCategoria{{ categoria.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center">
+                            <div class="bg-white w-96 p-6 rounded-lg shadow-lg">
+                                <h3 class="text-lg font-bold mb-4">Editar Categoría</h3>
+                                <form method="POST" action="{% url 'Editar Categoria' categoria.id %}">
+                                    {% csrf_token %}
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700">Nombre</label>
+                                        <input 
+                                            type="text" 
+                                            name="nombre" 
+                                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" 
+                                            value="{{ categoria.nombre }}" 
+                                            required
+                                        >
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700">Estado</label>
+                                        <input 
+                                            type="checkbox" 
+                                            name="estado" 
+                                            class="form-check-input"
+                                            {% if categoria.estado %}checked{% endif %}
+                                        > Activo
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <button 
+                                            type="button" 
+                                            class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 mr-2"
+                                            onclick="closeModalEditarCategoria('{{ categoria.id }}')"
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button 
+                                            type="submit" 
+                                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
+                                        >
+                                            Guardar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-gray-600 text-center">No hay categorías registradas.</p>
+        {% endif %}
+    </div>
+    {% if categorias.paginator.num_pages > 1 %}
+        <div class="flex justify-center mt-6">
+            {% if categorias.has_previous %}
+                <a href="?page=1{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Primera</a>
+                <a href="?page={{ categorias.previous_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Anterior</a>
+            {% endif %}
+
+            <span class="px-3 py-2 mx-1 border rounded-lg bg-gray-800 text-white">
+                Página {{ categorias.number }} de {{ categorias.paginator.num_pages }}
+            </span>
+
+            {% if categorias.has_next %}
+                <a href="?page={{ categorias.next_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Siguiente</a>
+                <a href="?page={{ categorias.paginator.num_pages }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Última</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+
+<div id="modalNuevaCategoria" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center">
+    <div class="bg-white w-96 p-6 rounded-lg shadow-lg">
+        <h3 class="text-lg font-bold mb-4">Nueva Categoría</h3>
+        <form method="POST" action="{% url 'Gestionar Categorias' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Nombre</label>
+                <input 
+                    type="text" 
+                    name="nombre" 
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" 
+                    required
+                >
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Estado</label>
+                <input 
+                    type="checkbox" 
+                    name="estado" 
+                    class="form-check-input"
+                    checked
+                > Activo
+            </div>
+            <div class="flex justify-end">
+                <button 
+                    type="button" 
+                    class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 mr-2"
+                    onclick="closeModalNuevaCategoria()"
+                >
+                    Cancelar
+                </button>
+                <button 
+                    type="submit" 
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
+                >
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        setTimeout(function() {
+            let messages = document.querySelectorAll(".message");
+            messages.forEach(function(message) {
+                message.classList.add("opacity-0"); 
+                setTimeout(() => message.remove(), 500); 
+            });
+        }, 5000); 
+    });
+    function openModalNuevaCategoria() {
+        document.getElementById('modalNuevaCategoria').classList.remove('hidden');
+        document.getElementById('modalNuevaCategoria').classList.add('flex');
+    }
+
+    function closeModalNuevaCategoria() {
+        document.getElementById('modalNuevaCategoria').classList.remove('flex');
+        document.getElementById('modalNuevaCategoria').classList.add('hidden');
+    }
+
+    function openModalEditarCategoria(id) {
+        document.getElementById(`modalEditarCategoria${id}`).classList.remove('hidden');
+        document.getElementById(`modalEditarCategoria${id}`).classList.add('flex');
+    }
+
+    function closeModalEditarCategoria(id) {
+        document.getElementById(`modalEditarCategoria${id}`).classList.remove('flex');
+        document.getElementById(`modalEditarCategoria${id}`).classList.add('hidden');
+    }
+</script>
+{% endblock %}

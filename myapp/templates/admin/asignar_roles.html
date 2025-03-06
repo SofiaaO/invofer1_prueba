@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+    <div class="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+        <h2 class="text-2xl font-semibold mb-4 text-center">Asignar Roles a Usuarios</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} text-white p-4 mb-4 rounded-lg">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            <div>
+                <label for="user_id" class="block text-gray-700">Selecciona un usuario:</label>
+                <select name="user_id" id="user_id" class="block w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    {% for usuario in usuarios %}
+                        <option value="{{ usuario.id }}">{{ usuario.correo }}</option>
+                    {% empty %}
+                        <option value="">No hay usuarios disponibles</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="group_id" class="block text-gray-700">Selecciona un rol:</label>
+                <select name="group_id" id="group_id" class="block w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    {% for grupo in grupos %}
+                        <option value="{{ grupo.id }}">{{ grupo.name }}</option>
+                    {% empty %}
+                        <option value="">No hay roles disponibles</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Asignar Rol</button>
+        </form>
+        <a href="{% url 'dashboard' %}" class="w-full block text-center mt-4 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400">
+            Volver a Inicio
+        </a>
+    </div>
+{% endblock %}

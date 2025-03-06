@@ -1,0 +1,394 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Registrar nueva compra{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto mt-5 px-4">
+        <!-- Título y botones organizados -->
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold text-blue-700">Registrar Nueva Compra</h2>
+        </div>
+
+        <!-- Detalles de la Factura -->
+        <div class="bg-white shadow-lg rounded-lg">
+            <div class="p-5 rounded-t-lg border-b border-blue-200" style="background-color:#42638f">
+                <h5 class="text-xl font-semibold text-white">Detalles de la Factura</h5>
+            </div>
+            <div class="p-5">
+                <form method="post" action="{% url 'guardar_compra' %}" id="form-guardar-compra">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Proveedor -->
+                        <div>
+                            <label for="proveedor_id" class="block text-sm font-medium text-gray-700 mb-2">Proveedor</label>
+                            <div class="flex items-center gap-2">
+                                <select name="proveedor_id" id="proveedor_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                    <option value="" selected>Selecciona Proveedor</option>
+                                    {% for proveedor in proveedores %}
+                                        <option value="{{ proveedor.rif }}" {% if request.session.proveedor_id == proveedor.rif %}selected{% endif %}>
+                                            {{ proveedor.nombre }} - {{ proveedor.rif }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <button
+                                    type="button"
+                                    onclick="openModalNuevoProveedor()"
+                                    class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-500 transition duration-300"
+                                >
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Fecha -->
+                        <div>
+                            <label for="fecha" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                            <input type="text" id="fecha" value="{{ current_date }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
+                        </div>
+
+                        <!-- Factura N° -->
+                        <div>
+                            <label for="factura" class="block text-sm font-medium text-gray-700 mb-2">Compra Nº</label>
+                            <input type="text" id="factura" value="{{ numero_factura }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Botón para finalizar la compra -->
+                    <div class="flex justify-end mt-6">
+                        <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition duration-300">
+                            Guardar e Imprimir
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Carrito de Compras -->
+        <div class="bg-white shadow-lg rounded-lg mt-8">
+            <div class="p-5 rounded-t-lg border-b border-white flex justify-between items-center" style="background-color:#1e2a38">
+                <h5 class="text-xl font-semibold text-white">Carrito de Compras</h5>
+                <button
+                    onclick="openModalBuscarProducto()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition duration-300"
+                >
+                    <i class="fa-solid fa-magnifying-glass-plus mr-2"></i>Agregar producto
+                </button>
+            </div>
+            <div class="p-0">
+                <table class="w-full table-auto">
+                    <thead class="bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Código</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Producto</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Cantidad</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Precio Unitario</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Subtotal</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in carrito %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition duration-300">
+                            <td class="px-4 py-3">{{ item.codigo }}</td>
+                            <td class="px-4 py-3">{{ item.nombre }}</td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center">
+                                    <button onclick="actualizarCantidad({{ item.id }}, -1)" class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-300 transition duration-300">-</button>
+                                    <span class="mx-2 cantidad" data-id="{{ item.id }}">{{ item.cantidad }}</span>
+                                    <button onclick="actualizarCantidad({{ item.id }}, 1)" class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-300 transition duration-300">+</button>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">${{ item.precio }}</td>
+                            <td class="px-4 py-3 subtotal" data-id="{{ item.id }}">${{ item.subtotal|floatformat:2 }}</td>
+                            <td class="px-4 py-3">
+                                <form method="post" action="{% url 'eliminar_producto_compra' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id_producto" value="{{ item.id }}">
+                                    <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition duration-300">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Resumen de la compra -->
+        <div class="flex justify-end mt-8">
+            <h3 class="text-2xl font-bold text-green-600 total">Total: ${{ total|floatformat:2 }}</h3>
+        </div>
+    </div>
+
+    <!-- Modal para buscar productos -->
+    <div id="buscarProductoModal" class="fixed inset-0 bg-black bg-opacity-50 hidden p-4">
+        <div class="bg-white w-full max-w-4xl rounded-lg shadow-lg overflow-hidden mx-auto mt-10">
+            <div class="p-5 border-b border-blue-200 flex justify-between items-center" style="background-color:#42638f">
+                <h5 class="text-xl font-semibold text-white">Buscar Presentaciones</h5>
+                <button onclick="closeModalBuscarProducto()" class="text-white hover:text-gray-200 transition duration-300">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="p-5">
+                <input type="text" id="searchProducto" class="w-full px-4 py-2 border border-gray-700 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500" placeholder="Buscar producto...">
+                <table class="w-full table-auto">
+                    <thead style="background-color:#42638f">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Código</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Presentación</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Stock</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Precio</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Cantidad</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="productosTableBody">
+                        {% for presentacion in presentaciones %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition duration-300">
+                            <td class="px-4 py-3">{{ presentacion.codigo }}</td>
+                            <td class="px-4 py-3">{{ presentacion.producto.nombre }} - {{ presentacion.valor }} {{ presentacion.categoria_unidad.unidad_medida.nombre }}</td>
+                            <td class="px-4 py-3">{{ presentacion.stock }}</td>
+                            <td class="px-4 py-3">${{ presentacion.precio_compra }}</td>
+                            <form method="post" action="{% url 'agregar_producto_compra' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="id_presentacion" value="{{ presentacion.id }}">
+                                <td class="px-4 py-3">
+                                    <input type="number" name="cantidad" value="1" min="1" class="w-full px-2 py-1 border border-gray-300 rounded-lg" readonly>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition duration-300">
+                                        <i class="fa-solid fa-cart-plus"></i>
+                                    </button>
+                                </td>
+                            </form>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para nuevo proveedor -->
+    <div id="modalNuevoProveedor" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center" style="top: 10%;">
+        <div class="bg-white w-3/4 max-w-4xl rounded-lg shadow-lg  mx-auto mt-10">
+            <div class="p-5 border-b border-blue-200 flex justify-between items-center" style="background-color:#42638f">
+                <h3 class="text-xl font-semibold text-white">Nuevo Proveedor</h3>
+                <button onclick="closeModalNuevoProveedor()" class="text-white hover:text-gray-200 transition duration-300">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="p-5">
+                <form method="POST" action="{% url 'crear_proveedor' %}">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-4">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">RIF</label>
+                                <input type="text" name="rif" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">Nombre</label>
+                                <input type="text" name="nombre" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">Teléfono</label>
+                                <input type="text" name="telefono" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">Estado</label>
+                                <input type="checkbox" name="estado" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                <span class="ml-2 text-gray-700">Activo</span>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">Dirección</label>
+                                <textarea name="direccion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">Dirección Fiscal</label>
+                                <textarea name="direccion_fiscal" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">Productos Ofrecidos</label>
+                                <textarea name="productos_ofrecidos" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-6">
+                        <button type="button" onclick="closeModalNuevoProveedor()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-300 mr-2">Cancelar</button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        function openModalBuscarProducto() {
+            document.getElementById('buscarProductoModal').classList.remove('hidden');
+        }
+    
+        function closeModalBuscarProducto() {
+            document.getElementById('buscarProductoModal').classList.add('hidden');
+        }
+        $(document).ready(function() {
+            $('#proveedor_id').select2({
+                placeholder: "Buscar proveedor por nombre o RIF",
+                allowClear: true,
+                width: '100%',
+                matcher: function(params, data) {
+                    if ($.trim(params.term) === '') {
+                        return data;
+                    }
+                    var term = params.term.toLowerCase();
+                    var text = data.text.toLowerCase();
+                    if (text.indexOf(term) > -1) {
+                        return data;
+                    }
+                    return null;
+                }
+            });
+        
+
+            let proveedorSeleccionado = localStorage.getItem("proveedorSeleccionado");
+            if (proveedorSeleccionado) {
+                $('#proveedor_id').val(proveedorSeleccionado).trigger('change'); 
+            }
+        
+            $('#proveedor_id').on('change', function() {
+                localStorage.setItem("proveedorSeleccionado", $(this).val());
+            });
+        
+         
+            $('#formulario_compra').on('submit', function(event) {
+                event.preventDefault(); 
+                $.ajax({
+                    url: $(this).attr('action'), 
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        localStorage.removeItem("proveedorSeleccionado");
+                        $('#proveedor_id').val("").trigger('change'); 
+                        alert("Compra registrada correctamente")
+                    },
+                    error: function() {
+                        alert("Hubo un error al registrar la compra");
+                    }
+                });
+            });
+        });
+            
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchProducto');
+            const tableBody = document.getElementById('productosTableBody');
+    
+            searchInput.addEventListener('input', function() {
+                const searchTerm = searchInput.value.toLowerCase(); 
+                const rows = tableBody.getElementsByTagName('tr'); 
+    
+                for (let row of rows) {
+                    const cells = row.getElementsByTagName('td'); 
+                    let match = false;
+    
+
+                    const codigo = cells[0].textContent.toLowerCase();
+                    const presentacion = cells[1].textContent.toLowerCase();
+    
+                    if (codigo.includes(searchTerm) || presentacion.includes(searchTerm)) {
+                        match = true;
+                    }
+
+                    row.style.display = match ? '' : 'none';
+                }
+            });
+        });
+        function openModalNuevoProveedor() {
+            document.getElementById('modalNuevoProveedor').classList.remove('hidden');
+            document.getElementById('modalNuevoProveedor').classList.add('flex');
+        }
+
+        function closeModalNuevoProveedor() {
+            document.getElementById('modalNuevoProveedor').classList.remove('flex');
+            document.getElementById('modalNuevoProveedor').classList.add('hidden');
+        }
+
+        function actualizarCantidad(id, cambio) {
+            let cantidadElement = document.querySelector(`.cantidad[data-id="${id}"]`);
+            let cantidadActual = parseInt(cantidadElement.textContent);
+
+            let nuevaCantidad = cantidadActual + cambio;
+
+            if (nuevaCantidad < 1) {
+                nuevaCantidad = 1;
+            }
+
+            fetch("/compras/editar-cantidad/", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `id=${id}&cantidad=${nuevaCantidad}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    cantidadElement.textContent = data.cantidad;
+
+                    let subtotalElement = document.querySelector(`.subtotal[data-id="${id}"]`);
+                    if (subtotalElement) {
+                        subtotalElement.textContent = `$${data.subtotal.toFixed(2)}`;
+                    }
+
+                    let totalElement = document.querySelector('.total');
+                    if (totalElement) {
+                        totalElement.textContent = `Total: $${data.total.toFixed(2)}`;
+                    }
+                } else {
+                    alert("Error al actualizar la cantidad");
+                }
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                document.cookie.split(';').forEach(cookie => {
+                    let trimmedCookie = cookie.trim();
+                    if (trimmedCookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(trimmedCookie.substring(name.length + 1));
+                    }
+                });
+            }
+            return cookieValue;
+        }
+        document.getElementById('form-guardar-compra').addEventListener('submit', function(event) {
+            event.preventDefault();  
+
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const pdfWindow = window.open(data.compra_url, '_blank', 'width=800,height=600');
+
+                    window.location.href = "{% url 'nueva_compra' %}";
+                } else {
+                    alert("Hubo un error al guardar la compra: " + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Hubo un error al procesar la solicitud.");
+            });
+        });
+    </script>
+{% endblock %}

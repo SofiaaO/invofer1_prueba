@@ -1,0 +1,64 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Crear Rol{% endblock %}
+
+{% block content %}
+    <div class="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+        <h2 class="text-2xl font-semibold mb-6 text-center text-gray-800">Crear Rol</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="p-3 mb-4 text-sm text-white bg-blue-500 rounded-md">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Campo Nombre del Grupo -->
+            <div>
+                <label for="nombre_grupo" class="block text-sm font-medium text-gray-700">Nombre del Rol:</label>
+                <input type="text" name="nombre_grupo" id="nombre_grupo" required 
+                    class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <!-- Permisos -->
+            <div>
+                <h2 class="text-xl font-semibold mb-3 text-gray-800">Seleccionar Permisos:</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    {% for permiso in permisos %}
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" name="permisos" value="{{ permiso.id }}" id="permiso_{{ permiso.id }}" 
+                                class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <label for="permiso_{{ permiso.id }}" class="text-gray-700">
+                                {% if permiso.name|lower|slice:":8" == "can add " %}
+                                    Añadir {{ permiso.name|slice:"8:" }}
+                                {% elif permiso.name|lower|slice:":11" == "can change " %}
+                                    Modificar {{ permiso.name|slice:"11:" }}
+                                {% elif permiso.name|lower|slice:":11" == "can delete " %}
+                                    Eliminar {{ permiso.name|slice:"11:" }}
+                                {% elif permiso.name|lower|slice:":9" == "can view " %}
+                                    Ver {{ permiso.name|slice:"9:" }}
+                                {% else %}
+                                    {{ permiso.name }}
+                                {% endif %}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex justify-end space-x-3">
+                <a href="{% url 'dashboard' %}" class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500">
+                    Volver
+                </a>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    Crear Grupo
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

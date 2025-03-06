@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión</title>
+    <link rel="stylesheet" href="{% static 'all.min.css' %}">
+    <style>
+        body { 
+            box-sizing: border-box; 
+            font-family: Arial, sans-serif; 
+            background-color: #a2bacd; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0;
+            position: relative; /* Necesario para posicionar el logo */
+        }
+        .container { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 8px; 
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); 
+            width: 450px;
+            margin-top: 120px; /* Espacio ajustado para el logo */
+            position: relative; /* Asegura que el contenedor esté en el flujo normal */
+            z-index: 1; /* Asegura que el contenedor esté sobre el logo */
+        }
+        .container h2 { 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+        .container form { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        .form-group { 
+            margin-bottom: 20px;
+            width: 100%;
+            position: relative;
+        }
+        .form-group label { 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+            display: block; 
+        }
+        .form-group input { 
+            padding: 10px;
+            border: 1px solid #075e8d; 
+            border-radius: 10px; 
+            width: 96%;
+            background-color: #c8d8e5b5;
+        }
+        .form-group i { 
+            position: absolute; 
+            left: 93%; 
+            top: 70%; 
+            transform: translateY(-50%);
+            color: #00346c; 
+        }
+        .container button { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            padding: 10px; 
+            border-radius: 5px; 
+            width: 50%;
+            margin-top: 20px; 
+        }
+        .container button:hover { 
+            background: #0056b3; 
+        }
+        .error-message { 
+            color: red; 
+            font-size: 14px; 
+            text-align: center; 
+        }
+        #logo {
+            position: absolute;
+            top: 0px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            height: 250px; 
+            width: auto; 
+            max-width: 100%; 
+            z-index: 0; 
+        }
+    </style>
+</head>
+<body>
+    <img src="{% static 'Invofer.png' %}" alt="LOGO" id="logo">
+    <div class="container">
+        <h2>Inicio de Sesión</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="correo">Correo</label>
+                <i class="fas fa-envelope"></i>
+                {{ form.correo }}
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <i class="fas fa-lock"></i>
+                {{ form.password }}
+            </div>
+            <button type="submit">Ingresar</button>
+        </form>
+
+        {% if messages %}
+            <div class="error-message">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,168 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Asignar Unidades a Categorías{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} text-white p-4 mb-4 rounded-lg">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% if perms.myapp.add_categoriaunidadmedida %}
+        <h2 class="text-4xl font-bold mb-6 mt-6 text-gray-800">Asignar Unidades de Medida a Categorías</h2>
+        <form method="POST" class="bg-white shadow-md rounded-lg p-6">
+            {% csrf_token %}
+        
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Categoría</label>
+                <div class="relative">
+                    <select name="{{ form.categorias.name }}" class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                        <option value="" selected disabled>Seleccione categoría</option>  
+                        {% for categoria in form.categorias %}
+                            <option value="{{ categoria.data.value }}" {% if categoria.data.selected %}selected{% endif %}>
+                                {{ categoria.data.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Unidades de Medida</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {% for unidad in form.unidades_medida %}
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="{{ form.unidades_medida.name }}" value="{{ unidad.data.value }}" 
+                                class="form-checkbox h-5 w-5 text-blue-600 rounded" 
+                                {% if unidad.data.selected %}checked{% endif %}>
+                            <span class="text-gray-700">{{ unidad.data.label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>     
+        
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500">
+                Guardar Relación
+            </button>
+        </form>
+    {% endif %}
+
+    <h3 class="text-2xl font-bold mt-8 mb-4 text-gray-800">Relaciones Registradas</h3>
+
+    <div class="overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="min-w-full bg-white border border-gray-200 mt-4">
+            <thead class="bg-gray-800 text-white">
+                <tr>
+                    <th class="py-3 px-6 text-left">Categoría</th>
+                    <th class="py-3 px-6 text-left">Unidades de Medida</th>
+                    {% if perms.myapp.change_categoriaunidadmedida %}
+                        <th class="py-3 px-6 text-center">Acciones</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody class="text-gray-700 text-sm">
+                {% for categoria in categorias_unidades %}
+                    <tr class="border-b hover:bg-gray-100">
+                        <td class="py-3 px-6">{{ categoria.categoria.nombre }}</td>
+                        <td class="py-3 px-6">
+                            <span class="bg-gray-200 text-gray-800 px-2 py-1 rounded-md text-xs">
+                                {{ categoria.unidad_medida.nombre }} ({{ categoria.unidad_medida.abreviatura }})
+                            </span>
+                        </td>
+                        {% if perms.myapp.change_categoriaunidadmedida %}
+                            <td class="py-3 px-6 text-center">
+                                <button 
+                                    class="bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-900 focus:ring-2 focus:ring-white editar-btn"
+                                    data-categoria-id="{{ categoria.categoria.id }}"  
+                                    data-categoria-nombre="{{ categoria.categoria.nombre }}">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-gray-500 py-4">No hay unidades asignadas</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal de edición -->
+<div id="editModal" class="fixed inset-0 items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <h3 class="text-xl font-bold mb-4">Editar Categoría</h3>
+        <form id="editForm" method="POST" action="#">
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Categoría</label>
+                <select id="editCategoria" name="categoria" class="w-full border-gray-300 rounded-md shadow-sm" disabled>
+                    <option value="" selected>Seleccione una categoría</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Unidades de Medida</label>
+                <div id="editUnidades" class="grid grid-cols-2 gap-2">
+                </div>
+            </div>
+
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-500">
+                Guardar Cambios
+            </button>
+            <button type="button" id="closeModal" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 ml-2">
+                Cancelar
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const modal = document.getElementById("editModal");
+        const closeModal = document.getElementById("closeModal");
+        const editForm = document.getElementById("editForm");
+        const unidadesContainer = document.getElementById("editUnidades");
+        const categoriaSelect = document.getElementById("editCategoria");
+
+        document.querySelectorAll(".editar-btn").forEach(button => {
+            button.addEventListener("click", function() {
+                const categoriaId = this.getAttribute("data-categoria-id");
+                const categoriaNombre = this.getAttribute("data-categoria-nombre");
+                categoriaSelect.innerHTML = `<option value="${categoriaId}" selected>${categoriaNombre}</option>`;
+
+                fetch(`/obtener-unidades-categoria/${categoriaId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        unidadesContainer.innerHTML = "";
+                        data.unidades.forEach(unidad => {
+                            const checked = unidad.seleccionada ? "checked" : "";
+                            unidadesContainer.innerHTML += `
+                                <label>
+                                    <input type="checkbox" name="unidades_medida" value="${unidad.id}" ${checked} class="mr-2">
+                                    ${unidad.nombre} (${unidad.abreviatura})
+                                </label>
+                            `;
+                        });
+
+                        editForm.setAttribute("action", `/editar-categoria-unidades/${categoriaId}/`);
+                        modal.classList.remove("hidden");
+                        modal.classList.add("flex");
+                    });
+            });
+        });
+
+        closeModal.addEventListener("click", function() {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        });
+    });
+</script>
+{% endblock %}

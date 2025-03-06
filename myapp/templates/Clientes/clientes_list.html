@@ -1,0 +1,226 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Lista de Clientes{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+    {% if messages %}
+        <div id="messages-container" class="fixed top-21 right-11 space-y-2">
+            {% for message in messages %}
+                <div class="message {% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} text-white p-4 mb-4 rounded-lg shadow-lg transition-opacity duration-500">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="text-4xl font-bold mb-6 mt-6 text-gray-800">Lista de Clientes</h2>
+
+    <div class="flex justify-between items-center mb-6">
+        <form method="GET" action="" class="flex">
+            <input 
+                type="text" 
+                name="buscar" 
+                placeholder="Buscar cliente por cédula o nombre..." 
+                class="w-72 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:outline-none"
+                value="{{ request.GET.buscar|default:'' }}"
+            >
+            <button 
+                type="submit" 
+                class="ml-4 bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500"
+            >
+                Buscar
+            </button>
+        </form>
+        {% if perms.myapp.add_cliente %}
+            <button 
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 focus:ring-2 focus:ring-blue-400"
+                onclick="openModalNuevoUsuario()"
+            >
+            <i class="fa-solid fa-user-plus"></i> Nuevo cliente
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="overflow-x-auto shadow-md sm:rounded-lg">
+        {% if clientes %}
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="py-3 px-6 text-left">Cédula</th>
+                        <th class="py-3 px-6 text-left">Nombre</th>
+                        <th class="py-3 px-6 text-left">Dirección</th>
+                        <th class="py-3 px-6 text-left">Teléfono</th>
+                        <th class="py-3 px-6 text-left">Fecha Registro</th>
+                        <th class="py-3 px-6 text-left">Estado</th>
+                        {% if perms.myapp.change_cliente %}
+                            <th class="py-3 px-6 text-left">Acciones</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700 text-sm">
+                    {% for cliente in clientes %}
+                        <tr class="border-b hover:bg-gray-100">
+                            <td class="py-3 px-6">{{ cliente.cedula }}</td>
+                            <td class="py-3 px-6">{{ cliente.nombre }}</td>
+                            <td class="py-3 px-6">{{ cliente.direccion }}</td>
+                            <td class="py-3 px-6">{{ cliente.telefono }}</td>
+                            <td class="py-3 px-6">{{ cliente.fecha_registro|date:"d/m/Y H:i" }}</td>
+                            <td class="py-3 px-6">
+                                {% if cliente.estado %}
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Activo</span>
+                                {% else %}
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            {% if perms.myapp.change_cliente %}
+                                <td class="py-3 px-6">
+                                    <button 
+                                        class="bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-900 focus:ring-2 focus:ring-white"
+                                        onclick="openModalEditarUsuario('{{ cliente.id }}')"
+                                    >
+                                    <i class="fa-solid fa-user-pen"></i>
+                                    </button>
+                                </td>
+                            {% endif %}
+                        </tr>
+
+                        <!-- Modal para editar usuario -->
+                        <div id="modalEditarUsuario{{ cliente.id }}" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center">
+                            <div class="bg-white w-96 p-6 rounded-lg shadow-lg">
+                                <h3 class="text-lg font-bold mb-4">Editar Cliente</h3>
+                                <form method="POST" action="{% url 'Editar Clientes' cliente.id %}">
+                                    {% csrf_token %}
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700">Cédula</label>
+                                        <input type="text" name="cedula" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" value="{{ cliente.cedula }}" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700">Nombre</label>
+                                        <input type="text" name="nombre" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" value="{{ cliente.nombre }}" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700">Teléfono</label>
+                                        <input type="text" name="telefono" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" value="{{ cliente.telefono }}" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700">Dirección</label>
+                                        <textarea name="direccion" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">{{ cliente.direccion }}</textarea>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700">Estado</label>
+                                        <input 
+                                            type="checkbox" 
+                                            name="estado" 
+                                            class="form-check-input"
+                                            {% if cliente.estado %}checked{% endif %}
+                                        > Activo
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 mr-2" onclick="closeModalEditarUsuario('{{ cliente.id }}')">Cancelar</button>
+                                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500">Guardar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-gray-600 text-center">No hay clientes registrados.</p>
+        {% endif %}
+    </div>
+    {% if clientes.paginator.num_pages > 1 %}
+        <div class="flex justify-center mt-6">
+            {% if clientes.has_previous %}
+                <a href="?page=1{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Primera</a>
+                <a href="?page={{ clientes.previous_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Anterior</a>
+            {% endif %}
+
+            <span class="px-3 py-2 mx-1 border rounded-lg bg-gray-800 text-white">
+                Página {{ clientes.number }} de {{ clientes.paginator.num_pages }}
+            </span>
+
+            {% if clientes.has_next %}
+                <a href="?page={{ clientes.next_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Siguiente</a>
+                <a href="?page={{ clientes.paginator.num_pages }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Última</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+
+<div id="modalNuevoUsuario" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center">
+    <div class="bg-white w-96 p-6 rounded-lg shadow-lg">
+        <h3 class="text-lg font-bold mb-4">Nuevo Cliente</h3>
+        <form method="POST" action="{% url 'Crear Clientes' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Cédula</label>
+                <input type="text" name="cedula" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" value="{{ cliente.cedula }}" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Nombre</label>
+                <input type="text" name="nombre" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" value="{{ cliente.nombre }}" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Teléfono</label>
+                <input type="text" name="telefono" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" value="{{ cliente.telefono }}" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Dirección</label>
+                <textarea name="direccion" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">{{ cliente.direccion }}</textarea>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Estado</label>
+                <input 
+                    type="checkbox" 
+                    name="estado" 
+                    class="form-check-input"
+                    checked
+                > Activo
+            </div>
+            <div class="flex justify-end">
+                <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 mr-2" onclick="closeModalNuevoUsuario()">Cancelar</button>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        setTimeout(function() {
+            let messages = document.querySelectorAll(".message");
+            messages.forEach(function(message) {
+                message.classList.add("opacity-0"); 
+                setTimeout(() => message.remove(), 500);
+            });
+        }, 5000);
+    });
+
+    function openModalNuevoUsuario() {
+        document.getElementById('modalNuevoUsuario').classList.remove('hidden');
+        document.getElementById('modalNuevoUsuario').classList.add('flex');
+    }
+
+    function closeModalNuevoUsuario() {
+        document.getElementById('modalNuevoUsuario').classList.remove('flex');
+        document.getElementById('modalNuevoUsuario').classList.add('hidden');
+    }
+
+    function openModalEditarUsuario(id) {
+        document.getElementById(`modalEditarUsuario${id}`).classList.remove('hidden');
+        document.getElementById(`modalEditarUsuario${id}`).classList.add('flex');
+    }
+
+    function closeModalEditarUsuario(id) {
+        document.getElementById(`modalEditarUsuario${id}`).classList.remove('flex');
+        document.getElementById(`modalEditarUsuario${id}`).classList.add('hidden');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto p-6 bg-gradient-to-r from-blue-500 to-teal-400 shadow-lg rounded-lg">
+    <h1 class="text-5xl font-bold text-white mb-6 text-center">Bienvenido al Sistema</h1>
+    {% if is_admin %}
+        <p class="text-xl text-white mb-8 text-center">Aquí encontrarás toda la información relevante y podrás gestionar todas las opciones de administración.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            <a href="{% url 'crear_usuario' %}" class="flex items-center justify-center p-4 bg-white rounded-xl shadow-md hover:scale-105 transition-all duration-300">
+                <div class="w-12 h-12 flex items-center justify-center text-2xl text-white bg-gray-700 rounded-full mr-4">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+                <h2 class="text-md font-semibold text-gray-700">Crear Usuario</h2>
+            </a>
+
+            <a href="{% url 'crear_grupo' %}" class="flex items-center justify-center p-4 bg-white rounded-xl shadow-md hover:scale-105 transition-all duration-300">
+                <div class="w-12 h-12 flex items-center justify-center text-2xl text-white bg-gray-700 rounded-full mr-4">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+                <h2 class="text-md font-semibold text-gray-700">Crear Rol</h2>
+            </a>
+
+            <a href="{% url 'asignar_roles' %}" class="flex items-center justify-center p-4 bg-white rounded-xl shadow-md hover:scale-105 transition-all duration-300">
+                <div class="w-12 h-12 flex items-center justify-center text-2xl text-white bg-gray-700 rounded-full mr-4">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <h2 class="text-md font-semibold text-gray-700">Asignar Roles</h2>
+            </a>
+
+            <a href="{% url 'modificar_permisos' %}" class="flex items-center justify-center p-4 bg-white rounded-xl shadow-md hover:scale-105 transition-all duration-300">
+                <div class="w-12 h-12 flex items-center justify-center text-2xl text-white bg-gray-700 rounded-full mr-4">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
+                <h2 class="text-md font-semibold text-gray-700">Modificar Permisos</h2>
+            </a>
+        </div>
+    {% endif %}
+
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mt-6 p-4 rounded-lg 
+                        {% if message.tags == 'error' %}bg-red-500 text-white{% else %}bg-green-500 text-white{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8 p-5">
+    <div class="bg-gray-600 text-white p-6 rounded-xl shadow-md">
+        <div class="flex items-center mb-4">
+            <i class="fas fa-boxes text-3xl mr-4"></i>
+            <h2 class="text-xl font-bold">Inventario Neto</h2>
+        </div>
+        <p class="text-2xl">{{ inventario_neto }}</p>
+        <p class="text-sm text-gray-200">Productos en stock: {{ productos_en_stock }}</p>
+    </div>
+
+    <div class="bg-gray-600 text-white p-6 rounded-xl shadow-md">
+        <div class="flex items-center mb-4">
+            <i class="fas fa-chart-line text-3xl mr-4"></i>
+            <h2 class="text-xl font-bold">Ventas 2025</h2>
+        </div>
+        <p class="text-2xl">Bs. {{ ventas_totales }}</p>
+        <p class="text-sm text-gray-200">Facturas emitidas: {{ facturas_emitidas }}</p>
+    </div>
+
+    <div class="bg-gray-600 text-white p-6 rounded-xl shadow-md">
+        <div class="flex items-center mb-4">
+            <i class="fas fa-shopping-cart text-3xl mr-4"></i>
+            <h2 class="text-xl font-bold">Compras 2025</h2>
+        </div>
+        <p class="text-2xl">Bs. {{ compras_totales }}</p>
+        <p class="text-sm text-gray-200">Compras realizadas: {{ compras_realizadas }}</p>
+    </div>
+
+    <div class="bg-gray-600 text-white p-6 rounded-xl shadow-md">
+        <div class="flex items-center mb-4">
+            <i class="fas fa-users text-3xl mr-4"></i>
+            <h2 class="text-xl font-bold">Clientes</h2>
+        </div>
+        <p class="text-2xl">{{ total_clientes }}</p>
+        <p class="text-sm text-gray-200">Clientes nuevos: {{ clientes_nuevos }}</p>
+    </div>
+</div>
+
+<style>
+    .bg-gray-600 {
+        --tw-bg-opacity: 1;
+        background-color: #1e2a38;
+    }
+    .bg-gradient-to-r {
+        background: linear-gradient(30deg, #1e2a38, #376398);
+    }
+
+    h1 {
+        @apply text-white font-bold;
+    }
+
+    .hover\:scale-105:hover {
+        transform: scale(1.05);
+    }
+
+    .hover\:scale-110:hover {
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}

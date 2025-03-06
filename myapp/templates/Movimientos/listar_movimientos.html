@@ -1,0 +1,207 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Lista de Movimientos{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+    <h2 class="text-4xl font-bold mb-6 mt-6 text-gray-800">Lista de Movimientos</h2>
+
+    <div class="flex justify-between items-center mb-6">
+        <form method="GET" action="{% url 'listar_movimientos' %}" class="flex items-end gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Tipo de Movimiento</label>
+                <select name="tipo_movimiento" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg">
+                    <option value="">Todos</option>
+                    <option value="compra" {% if tipo_movimiento == 'compra' %}selected{% endif %}>Compra</option>
+                    <option value="venta" {% if tipo_movimiento == 'venta' %}selected{% endif %}>Venta</option>
+                    <option value="ajuste_entrada" {% if tipo_movimiento == 'ajuste_entrada' %}selected{% endif %}>Ajuste Entrada</option>
+                    <option value="ajuste_salida" {% if tipo_movimiento == 'ajuste_salida' %}selected{% endif %}>Ajuste Salida</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Fecha Inicio</label>
+                <input type="date" name="fecha_inicio" value="{{ fecha_inicio|default:'' }}" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Fecha Fin</label>
+                <input type="date" name="fecha_fin" value="{{ fecha_fin|default:'' }}" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg">
+            </div>
+            <div>
+                <button 
+                    type="submit" 
+                    class="ml-4 bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500"
+                ><i class="fa-solid fa-magnifying-glass fa-lg"></i>
+                </button>
+            </div>
+        </form>
+        {% if perms.myapp.add_movimiento %}
+            <button 
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 focus:ring-2 focus:ring-blue-400"
+                onclick="openModalCrearMovimiento()"
+            >
+            <i class="fa-solid fa-plus"></i> Crear ajuste
+            </button>
+        {% endif %}
+    </div>
+
+    <!-- Tabla de movimientos -->
+    <div class="overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="min-w-full bg-white border border-gray-200 text-center">
+            <thead class="bg-gray-800 text-white">
+                <tr>
+                    <th class="py-3 px-6">Presentación</th>
+                    <th class="py-3 px-6">Tipo</th>
+                    <th class="py-3 px-6">Fecha</th>
+                    <th class="py-3 px-6">Cantidad</th>
+                    <th class="py-3 px-6">Precio Unitario</th>
+                    <th class="py-3 px-6">Subtotal</th>
+                    <th class="py-3 px-6">Usuario</th>
+                    <th class="py-3 px-6">Cliente/Proveedor</th>
+                    <th class="py-3 px-6">Descripción</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700 text-sm">
+                {% for detalle in movimientos %}
+                    <tr class="border-b hover:bg-gray-100">
+                        <td class="py-3 px-4">
+                            {{ detalle.presentacion.producto.nombre }} - {{ detalle.presentacion.valor }} {{ detalle.presentacion.categoria_unidad.unidad_medida.nombre }}
+                        </td>
+                        <td class="py-3 px-4">
+                            {% if detalle.movimiento.tipo_movimiento == 'compra' or detalle.movimiento.tipo_movimiento == 'ajuste_entrada' %}
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">{{ detalle.movimiento.tipo_movimiento }}</span> 
+                            {% elif detalle.movimiento.tipo_movimiento == 'venta' or detalle.movimiento.tipo_movimiento == 'ajuste_salida' %}
+                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">{{ detalle.movimiento.tipo_movimiento }}</span> 
+                            {% else %}
+                                {{ detalle.movimiento.tipo_movimiento }}
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4">{{ detalle.movimiento.fecha_movimiento|date:"d/m/Y H:i" }}</td>
+                        <td class="py-3 px-4">
+                            {% if detalle.movimiento.tipo_movimiento == 'compra' or detalle.movimiento.tipo_movimiento == 'ajuste_entrada' %}
+                                <span class="text-green-600">+{{ detalle.cantidad }}</span>
+                            {% elif detalle.movimiento.tipo_movimiento == 'venta' or detalle.movimiento.tipo_movimiento == 'ajuste_salida' %}
+                                <span class="text-red-600">-{{ detalle.cantidad }}</span>
+                            {% else %}
+                                {{ detalle.cantidad }}
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4">${{ detalle.precio_unitario|floatformat:2 }}</td>
+                        <td class="py-3 px-4">${{ detalle.subtotal|floatformat:2 }}</td>
+                        <td class="py-3 px-4">{{ detalle.movimiento.usuario.nombre_usuario }}</td>
+                        <td class="py-3 px-4">
+                            {% if detalle.movimiento.tipo_movimiento == 'venta' %}
+                                {{ detalle.movimiento.cliente.nombre }} {{ detalle.movimiento.cliente.apellido }}
+                            {% elif detalle.movimiento.tipo_movimiento == 'compra' %}
+                                {{ detalle.movimiento.proveedor.nombre }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4">{{ detalle.movimiento.descripcion }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    {% if movimientos.paginator.num_pages > 1 %}
+        <div class="flex justify-center mt-6">
+            {% if movimientos.has_previous %}
+                <a href="?page=1{% if request.GET.tipo_movimiento %}&tipo_movimiento={{ request.GET.tipo_movimiento }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Primera</a>
+                <a href="?page={{ movimientos.previous_page_number }}{% if request.GET.tipo_movimiento %}&tipo_movimiento={{ request.GET.tipo_movimiento }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Anterior</a>
+            {% endif %}
+
+            <span class="px-3 py-2 mx-1 border rounded-lg bg-gray-800 text-white">
+                Página {{ movimientos.number }} de {{ movimientos.paginator.num_pages }}
+            </span>
+
+            {% if movimientos.has_next %}
+                <a href="?page={{ movimientos.next_page_number }}{% if request.GET.tipo_movimiento %}&tipo_movimiento={{ request.GET.tipo_movimiento }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Siguiente</a>
+                <a href="?page={{ movimientos.paginator.num_pages }}{% if request.GET.tipo_movimiento %}&tipo_movimiento={{ request.GET.tipo_movimiento }}{% endif %}{% if request.GET.fecha_inicio %}&fecha_inicio={{ request.GET.fecha_inicio }}{% endif %}{% if request.GET.fecha_fin %}&fecha_fin={{ request.GET.fecha_fin }}{% endif %}" 
+                class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Última</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal para crear movimientos -->
+<div id="modalCrearMovimiento" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center" style="top: 10%;">
+    <div class="bg-white w-3/4 max-w-4xl p-6 rounded-lg shadow-lg">
+        <h3 class="text-lg font-bold mb-4">Crear Movimiento Manual</h3>
+        <form method="POST" action="{% url 'listar_movimientos' %}">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Columna 1 -->
+                <div class="space-y-4">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Tipo de Movimiento</label>
+                        <select name="tipo_movimiento" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">
+                            <option value="compra">Compra</option>
+                            <option value="venta">Venta</option>
+                            <option value="ajuste_entrada">Ajuste Entrada</option>
+                            <option value="ajuste_salida">Ajuste Salida</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Presentación</label>
+                        <select name="presentacion" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">
+                            {% for presentacion in presentaciones %}
+                                <option value="{{ presentacion.id }}">{{ presentacion.producto.nombre }} - {{ presentacion.valor }} {{ presentacion.categoria_unidad.unidad_medida.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Cantidad</label>
+                        <input type="number" name="cantidad" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Precio Unitario</label>
+                        <input type="number" name="precio_unitario" step="0.01" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Descripción</label>
+                <textarea name="descripcion" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"></textarea>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="flex justify-end mt-6">
+                <button 
+                    type="button" 
+                    class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 mr-2"
+                    onclick="closeModalCrearMovimiento()"
+                >
+                    Cancelar
+                </button>
+                <button 
+                    type="submit" 
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
+                >
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModalCrearMovimiento() {
+        document.getElementById('modalCrearMovimiento').classList.remove('hidden');
+        document.getElementById('modalCrearMovimiento').classList.add('flex');
+    }
+
+    function closeModalCrearMovimiento() {
+        document.getElementById('modalCrearMovimiento').classList.remove('flex');
+        document.getElementById('modalCrearMovimiento').classList.add('hidden');
+    }
+</script>
+{% endblock %}

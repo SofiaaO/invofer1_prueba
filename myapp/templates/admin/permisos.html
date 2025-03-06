@@ -1,0 +1,71 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+    <div class="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+        <h2 class="text-2xl font-semibold mb-4 text-center">Modificar Permisos de Roles</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.tags == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} text-white p-4 mb-4 rounded-lg">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <form method="POST" class="mb-6">
+            {% csrf_token %}
+            <div>
+                <label for="group_id" class="block text-gray-700">Selecciona un rol:</label>
+                <select name="group_id" id="group_id" onchange="this.form.submit()" class="block w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    <option value="">-- Selecciona un grupo --</option>
+                    {% for grupo in grupos %}
+                        <option value="{{ grupo.id }}" {% if grupo.id == grupo_seleccionado.id %}selected{% endif %}>
+                            {{ grupo.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+
+        {% if grupo_seleccionado %}
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="group_id" value="{{ grupo_seleccionado.id }}">
+
+                <h3 class="text-xl font-semibold mb-4">Permisos para {{ grupo_seleccionado.name }}</h3>
+
+                <div class="grid grid-cols-2 gap-4">
+                    {% for permiso in permisos %}
+                        <div class="flex items-center">
+                            <input 
+                                type="checkbox" 
+                                name="permisos" 
+                                value="{{ permiso.id }}"
+                                {% if permiso in grupo_seleccionado.permissions.all %}checked{% endif %}
+                                class="mr-2"
+                                id="permission_{{ permiso.id }}"
+                            >
+                            <label for="permission_{{ permiso.id }}" class="text-gray-700">
+                                {% if permiso.name|lower|slice:":8" == "can add " %}
+                                    Añadir {{ permiso.name|slice:"8:" }}
+                                {% elif permiso.name|lower|slice:":11" == "can change " %}
+                                    Modificar {{ permiso.name|slice:"11:" }}
+                                {% elif permiso.name|lower|slice:":11" == "can delete " %}
+                                    Eliminar {{ permiso.name|slice:"11:" }}
+                                {% elif permiso.name|lower|slice:":9" == "can view " %}
+                                    Ver {{ permiso.name|slice:"9:" }}
+                                {% else %}
+                                    {{ permiso.name }}
+                                {% endif %}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Guardar Cambios</button>
+            </form>
+        {% endif %}
+        
+        <a href="{% url 'dashboard' %}" class="w-full block text-center mt-4 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400">
+            Volver a Inicio
+        </a>
+    </div>
+{% endblock %}

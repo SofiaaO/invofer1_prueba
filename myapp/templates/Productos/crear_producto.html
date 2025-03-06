@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}  
+
+{% block content %}
+<div class="container">
+    <h2 class="text-4xl font-bold mb-6 mt-6 text-gray-800">Crear Producto</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <div class="mb-4">
+                <label for="{{ form.nombre.id_for_label }}" class="block text-gray-700 font-bold mb-2">
+                    {{ form.nombre.label }}
+                </label>
+                {{ form.nombre }}
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.categoria.id_for_label }}" class="block text-gray-700 font-bold mb-2">
+                    {{ form.categoria.label }}
+                </label>
+                {{ form.categoria }}
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.marca.id_for_label }}" class="block text-gray-700 font-bold mb-2">
+                    {{ form.marca.label }}
+                </label>
+                {{ form.marca }}
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.estado.id_for_label }}" class="block text-gray-700 font-bold mb-2">
+                    {{ form.estado.label }}
+                </label>
+                {{ form.estado }}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'lista_productos' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
