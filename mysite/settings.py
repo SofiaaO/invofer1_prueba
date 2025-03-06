@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-1e*e#0+(9@7w)kz$8#r1p^=8r8m00hh)5esht7z2^2a2#mfebf'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 import os
 
@@ -81,18 +81,15 @@ AUTH_USER_MODEL = 'myapp.CustomUser'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+import dj_database_url
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'invofer',  # Nombre de la base de datos
-        'USER': 'postgres',  # Usuario de PostgreSQL
-        'PASSWORD': '31317525',  # Contraseña del usuario
-        'HOST': 'localhost',  # Host donde está alojada la base de datos
-        'PORT': '5432',  # Puerto de PostgreSQL (por defecto es 5432)
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
