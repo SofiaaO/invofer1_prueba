@@ -27,7 +27,11 @@ DEBUG = False
 
 import os
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = [
+    'invofer-app.onrender.com',
+    'localhost',  # Para desarrollo local
+    '127.0.0.1',  # Para desarrollo local
+]
 
 
 # Application definition
