@@ -5,7 +5,10 @@ from .forms import CategoriaForm
 from django.contrib import messages
 def gestionar_categorias(request, id=None):
     query = request.GET.get('buscar', '')
-    categorias_list = Categoria.objects.filter(nombre__icontains=query) if query else Categoria.objects.all()
+    if query:
+        categorias_list = Categoria.objects.filter(nombre__icontains=query).order_by('nombre')
+    else:
+        categorias_list = Categoria.objects.all().order_by('nombre')  # Ordena por el campo 'nom
     paginator = Paginator(categorias_list, 5)
     page_number = request.GET.get('page')
     categorias = paginator.get_page(page_number)

@@ -12,9 +12,9 @@ def listar_proveedores(request):
     if query:
         proveedores_list = Proveedor.objects.filter(
             Q(rif__istartswith=query) | Q(nombre__istartswith=query)
-        )
+        ).order_by('nombre') 
     else:
-        proveedores_list = Proveedor.objects.exclude(rif__isnull=True).exclude(rif="")
+        proveedores_list = Proveedor.objects.exclude(rif__isnull=True).exclude(rif="").order_by('nombre') 
 
     paginator = Paginator(proveedores_list, 10)  
     page_number = request.GET.get('page')

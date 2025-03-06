@@ -21,7 +21,7 @@ def listar_ventas(request):
     query = request.GET.get('buscar', '')
     fecha = request.GET.get('fecha', '')
 
-    ventas = Ventas.objects.all()
+    ventas = Ventas.objects.all().order_by('-fecha_venta')
 
     if query:
         ventas = ventas.filter(

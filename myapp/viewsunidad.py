@@ -7,9 +7,13 @@ from django.db.models import Q
 
 def gestionar_unidades(request, id=None):
     query = request.GET.get('buscar', '')
-    unidades_list = UnidadMedida.objects.filter(
+    
+    if query: 
+        unidades_list = UnidadMedida.objects.filter(
         Q(nombre__icontains=query) | Q(abreviatura__icontains=query)
-    ) if query else UnidadMedida.objects.all()
+    ).order_by('nombre')  
+    else:
+        unidades_list=UnidadMedida.objects.all().order_by('nombre') 
 
     paginator = Paginator(unidades_list, 5)
     page_number = request.GET.get('page')

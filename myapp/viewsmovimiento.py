@@ -16,13 +16,14 @@ def listar_movimientos(request):
     movimientos_list = DetalleMovimiento.objects.all().select_related('movimiento', 'presentacion')
 
     if tipo_movimiento:
-        movimientos_list = movimientos_list.filter(movimiento__tipo_movimiento=tipo_movimiento)
+        movimientos_list = movimientos_list.filter(movimiento__tipo_movimiento=tipo_movimiento).order_by('nombre') 
 
     if fecha_inicio and fecha_fin:
         fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
         fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
         movimientos_list = movimientos_list.filter(movimiento__fecha_movimiento__range=[fecha_inicio, fecha_fin])
 
+    movimientos_list = movimientos_list.order_by('movimiento__fecha_movimiento')
     presentaciones = Presentacion.objects.all()
 
     # Paginación

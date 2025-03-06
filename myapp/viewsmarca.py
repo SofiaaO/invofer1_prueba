@@ -7,7 +7,10 @@ from django.contrib import messages
 
 def gestionar_marcas(request, id=None):
     query = request.GET.get('buscar', '')
-    marcas_list = Marca.objects.filter(nombre__icontains=query) if query else Marca.objects.all()
+    if query:
+        marcas_list = Marca.objects.filter(nombre__icontains=query).order_by('nombre')
+    else: 
+        marcas_list= Marca.objects.all().order_by('nombre')
 
     paginator = Paginator(marcas_list, 2)
     page_number = request.GET.get('page')

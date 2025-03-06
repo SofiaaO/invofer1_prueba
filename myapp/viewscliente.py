@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 
 def listar_clientes(request):
     query = request.GET.get('buscar', '')
-    clientes_list = Cliente.objects.all()
+    clientes_list = Cliente.objects.all().order_by('nombre')
 
     if query:
         clientes_list = clientes_list.filter(

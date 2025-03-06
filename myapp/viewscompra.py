@@ -20,7 +20,7 @@ def listar_compras(request):
     query = request.GET.get('buscar', '')
     fecha = request.GET.get('fecha', '')
 
-    compras = Compras.objects.all()
+    compras = Compras.objects.all().order_by('-fecha_compra')
 
     if query:
         compras = compras.filter(
