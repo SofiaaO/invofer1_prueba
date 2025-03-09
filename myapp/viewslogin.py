@@ -7,8 +7,8 @@ from django.utils import timezone
 from django.contrib.auth.models import Permission
 from django.contrib.auth.decorators import login_required, permission_required
 from .forms import LoginForm
-
-
+from django.views.decorators.cache import never_cache
+@never_cache
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
@@ -19,7 +19,6 @@ def login_view(request):
             correo = form.cleaned_data['correo']
             password = form.cleaned_data['password']
 
-            # Autenticar con el campo 'correo'
             user = authenticate(request, username=correo, password=password)
 
             if user is not None:
@@ -27,7 +26,6 @@ def login_view(request):
                 user.fecha_ultima_sesion = timezone.now()
                 user.save(update_fields=['fecha_ultima_sesion'])
 
-                # Redirigir a todos los usuarios autenticados al dashboard
                 return redirect('dashboard')
             else:
                 messages.error(request, "Correo o contraseña incorrectos")
@@ -38,10 +36,16 @@ def login_view(request):
 
     return render(request, 'Login/login.html', {'form': form})
 
+@never_cache
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    response = redirect('login')
+    response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
+@never_cache
 @login_required
 def dashboard(request):
     is_admin = request.user.is_superuser or request.user.groups.filter(name='Administrador').exists()

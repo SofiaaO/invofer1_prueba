@@ -5,16 +5,17 @@ from myapp.forms import *
 # Create your views here.
 from django.db.models import Q
 from django.core.paginator import Paginator
-
+from django.contrib.auth.decorators import login_required
+@login_required
 def listar_proveedores(request):
     query = request.GET.get('buscar', '')
 
     if query:
         proveedores_list = Proveedor.objects.filter(
             Q(rif__istartswith=query) | Q(nombre__istartswith=query)
-        ).order_by('nombre') 
+        )
     else:
-        proveedores_list = Proveedor.objects.exclude(rif__isnull=True).exclude(rif="").order_by('nombre') 
+        proveedores_list = Proveedor.objects.exclude(rif__isnull=True).exclude(rif="")
 
     paginator = Paginator(proveedores_list, 10)  
     page_number = request.GET.get('page')

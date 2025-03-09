@@ -77,12 +77,13 @@ class CategoriaUnidadMedidaForm(forms.Form):
 class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
-        fields = ['nombre']
-        
-class ProductoMarcaCategoriaForm(forms.ModelForm):
-    class Meta:
-        model = Producto_Marca_Categoria
-        fields = ['nombre', 'categoria', 'marca', 'estado']        
+        fields = ['nombre', 'categoria','marca', 'estado']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'categoria': forms.Select(attrs={'class': 'form-control'}),
+            'marca': forms.Select(attrs={'class': 'form-control'}),
+            'estado': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
 
 class PresentacionForm(forms.ModelForm):
     class Meta:
@@ -109,23 +110,40 @@ class DetalleMovimientoForm(forms.ModelForm):
         model = DetalleMovimiento
         fields = ['presentacion', 'cantidad', 'precio_unitario']
 
-"""     def save(self, *args, **kwargs):
-        categoria_nombre = self.producto.categoria.nombre
-        prefijo = categoria_nombre[:3].upper()
-
-        ult_presentacion = Presentacion.objects.filter(producto__categoria=self.producto.categoria).order_by("-id").first()
-
-        if ult_presentacion and ult_presentacion.codigo.startswith(prefijo):
-            ultimo_numero = int(ult_presentacion.codigo.split("-")[-1]) + 1
-        else:
-            ultimo_numero = 1
-
-        self.codigo = f"{prefijo}-{ultimo_numero:02d}"  
-        super().save(*args, **kwargs)
-
- """
-        
+      
 class ImpuestoForm(forms.ModelForm):
     class Meta:
         model = Impuesto
         fields = ['nombre', 'porcentaje', 'estado']
+
+class MonedaForm(forms.ModelForm):
+    class Meta:
+        model = Moneda
+        fields = ['codigo', 'nombre', 'simbolo', 'estado']
+
+
+
+class TasaCambioForm(forms.ModelForm):
+    class Meta:
+        model = TasaCambio
+        fields = ['moneda_origen', 'moneda_destino', 'tasa']
+        widgets = {
+            'moneda_origen': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Selecciona la moneda origen'}),
+            'moneda_destino': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Selecciona la moneda destino'}),
+            'tasa': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'placeholder': 'Ingresa la tasa de cambio'}),
+        }
+        labels = {
+            'moneda_origen': 'Moneda de origen',
+            'moneda_destino': 'Moneda de destino',
+            'tasa': 'Tasa de cambio',
+        }
+        help_texts = {
+            'tasa': 'La tasa debe ser un valor numérico con hasta dos decimales.',
+        }
+
+    # Validación personalizada si fuera necesario
+    def clean_tasa(self):
+        tasa = self.cleaned_data.get('tasa')
+        if tasa <= 0:
+            raise forms.ValidationError('La tasa de cambio debe ser mayor que cero.')
+        return tasa

@@ -1,0 +1,232 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-4xl font-bold mb-6 text-gray-800">
+        {% if editar %}Editar Presentación{% else %}Crear Presentación{% endif %}
+    </h2>
+
+    <form method="post" class="bg-white shadow-md rounded-lg p-6">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Campo: Producto -->
+            <div class="mb-6">
+                <label for="producto" class="block text-gray-700 font-bold mb-2">
+                    Producto
+                </label>
+                <div class="flex items-center gap-4">
+                    <select 
+                        id="producto" 
+                        name="producto" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        required
+                    >
+                        <option value="" disabled selected>Seleccione un producto</option>
+                        {% for producto in productos %}
+                            <option value="{{ producto.id }}" {% if editar and presentacion.producto.id == producto.id %}selected{% endif %}>
+                                {{ producto.nombre }} - {{ producto.marca.nombre }} ({{ producto.categoria.nombre }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <a 
+                        href="{% url 'agregar' %}" 
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-2"
+                    >
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Crear</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Campo: Código -->
+            <div class="mb-6">
+                <label for="codigo" class="block text-gray-700 font-bold mb-2">
+                    Código
+                </label>
+                <input 
+                    type="text" 
+                    id="codigo" 
+                    name="codigo" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    placeholder="Ingrese el código"
+                    value="{% if editar %}{{ presentacion.codigo }}{% endif %}"
+                    required
+                >
+            </div>
+
+            <!-- Campo: Unidad de Medida -->
+            <div class="mb-6">
+                <label for="categoria_unidad" class="block text-gray-700 font-bold mb-2">
+                    Unidad de Medida
+                </label>
+                <div class="flex items-center gap-4">
+                    <select 
+                        id="categoria_unidad" 
+                        name="categoria_unidad" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        required
+                    >
+                        <option value="" disabled selected>Seleccione una unidad</option>
+                        {% for unidad in unidades %}
+                            <option value="{{ unidad.id }}" {% if editar and presentacion.categoria_unidad.id == unidad.id %}selected{% endif %}>
+                                {{ unidad.unidad_medida.nombre }} ({{ unidad.unidad_medida.abreviatura }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    
+                </div>
+            </div>
+            
+            <!-- Campo: Valor -->
+            <div class="mb-6">
+                <label for="valor" class="block text-gray-700 font-bold mb-2">
+                    Valor de la Unidad
+                </label>
+                <input 
+                    type="number" 
+                    id="valor" 
+                    name="valor" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    placeholder="Ingrese el valor de la unidad de medida"
+                    step="0.01"
+                    value="{% if editar %}{{ presentacion.valor|stringformat:'f'|cut:','  }}{% endif%}"
+                    required
+                >
+            </div>
+
+            <!-- Campo: Precio de Venta -->
+            <div class="mb-6">
+                <label for="precio_venta" class="block text-gray-700 font-bold mb-2">
+                    Precio de Venta ($)
+                </label>
+                <input 
+                    type="number" 
+                    id="precio_venta" 
+                    name="precio_venta" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    placeholder="Ingrese el precio de venta en dolares"
+                    step="0.01"
+                    value="{% if editar %}{{ presentacion.precio_venta|stringformat:'f'|cut:','  }}{% endif %}"
+                    required
+                >
+            </div>
+
+            <!-- Campo: Precio de Compra -->
+            <div class="mb-6">
+                <label for="precio_compra" class="block text-gray-700 font-bold mb-2">
+                    Precio de Compra ($)
+                </label>
+                <input 
+                    type="number" 
+                    id="precio_compra" 
+                    name="precio_compra" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    placeholder="Ingrese el precio de compra en dolares"
+                    step="0.01"
+                    value="{% if editar %}{{ presentacion.precio_compra|stringformat:'f'|cut:','  }}{% endif %}"
+                    required
+                >
+            </div>
+
+            <!-- Campo: Stock -->
+            <div class="mb-6">
+                <label for="stock" class="block text-gray-700 font-bold mb-2">
+                    Stock
+                </label>
+                <input 
+                    type="number" 
+                    id="stock" 
+                    name="stock" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    placeholder="Ingrese el stock"
+                    value="{% if editar %}{{ presentacion.stock }}{% endif %}"
+                    required
+                >
+            </div>
+
+            <!-- Campo: Stock Mínimo -->
+            <div class="mb-6">
+                <label for="stock_minimo" class="block text-gray-700 font-bold mb-2">
+                    Stock Mínimo
+                </label>
+                <input 
+                    type="number" 
+                    id="stock_minimo" 
+                    name="stock_minimo" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    placeholder="Ingrese el stock mínimo"
+                    value="{% if editar %}{{ presentacion.stock_minimo }}{% endif %}"
+                    required
+                >
+            </div>
+
+            <!-- Campo: Estado -->
+            <div class="mb-6">
+                <label for="estado" class="block text-gray-700 font-bold mb-2">
+                    Estado
+                </label>
+                <div class="flex items-center">
+                    <input 
+                        type="checkbox" 
+                        id="estado" 
+                        name="estado" 
+                        class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        {% if not editar or presentacion.estado %}checked{% endif %}
+                    >
+                    <span class="ml-2 text-gray-700">Activo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón de Guardar -->
+        <div class="flex items-center justify-start mt-8 gap-5">
+            <button 
+                type="submit" 
+                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+                {% if editar %}Actualizar Presentación{% else %}Guardar Presentación{% endif %}
+            </button>
+            <a href="javascript:history.back()" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                Volver
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $("#producto").change(function() {
+            var productoId = $(this).val();
+            if (productoId) {
+                $.ajax({
+                    url: "/generar_codigo/" + productoId + "/",
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $("#codigo").val(data.codigo);
+                    }
+                });
+
+                $.ajax({
+                    url: "/obtener_unidades_por_producto/" + productoId + "/",
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        var unidadSelect = $("#categoria_unidad");
+                        unidadSelect.empty();
+                        unidadSelect.append('<option value="">Seleccione una unidad</option>');
+                        $.each(data.unidades, function(index, unidad) {
+                            unidadSelect.append('<option value="' + unidad.id + '">' + unidad.unidad_medida__nombre + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $("#codigo").val('');
+                $("#categoria_unidad").empty().append('<option value="">Seleccione una unidad</option>');
+            }
+        });
+    });
+    
+</script>
+{% endblock %}

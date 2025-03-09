@@ -3,13 +3,11 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from .models import Impuesto
 from .forms import ImpuestoForm
-
+from django.contrib.auth.decorators import login_required
+@login_required
 def gestionar_impuestos(request, id=None):
     query = request.GET.get('buscar', '')
-    if query: 
-        impuestos_list = Impuesto.objects.filter(nombre__icontains=query).order_by('nombre') 
-    else: 
-        impuestos_list= Impuesto.objects.all().order_by('nombre') 
+    impuestos_list = Impuesto.objects.filter(nombre__icontains=query) if query else Impuesto.objects.all()
     paginator = Paginator(impuestos_list, 5)
     page_number = request.GET.get('page')
     impuestos = paginator.get_page(page_number)

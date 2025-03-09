@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-<div class="container mx-auto py-8">
+<div class="container mx-auto py-8 pl-5">
     {% if messages %}
         <div id="messages-container" class="fixed top-21 right-11 space-y-2">
             {% for message in messages %}
@@ -49,7 +49,7 @@
     </div>
 
     <div class="overflow-x-auto shadow-md sm:rounded-lg">
-        {% if productos_marca_categoria %}
+        {% if productos %}
             <table class="min-w-full bg-white border border-gray-200 text-center">
                 <thead class="bg-gray-800 text-white">
                     <tr>
@@ -64,12 +64,12 @@
                     </tr>
                 </thead>
                 <tbody class="text-gray-700 text-sm">
-                    {% for producto in productos_marca_categoria %}
+                    {% for producto in productos %}
                         <tr class="border-b hover:bg-gray-100">
-                            <td class="py-3 px-4">{{ producto.nombre.nombre }}</td>
+                            <td class="py-3 px-4">{{ producto.nombre }}</td>
                             <td class="py-3 px-4">{{ producto.categoria.nombre }}</td>
                             <td class="py-3 px-4">{{ producto.marca.nombre }}</td>
-                            <td class="py-3 px-4">{{ producto.fecha_registro }}</td>
+                            <td class="py-3 px-4">{{ producto.fecha_registro|date:"d/m/Y H:i" }}</td>
                             <td class="py-3 px-6">
                                 {% if producto.estado %}
                                     <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Activo</span>
@@ -86,7 +86,7 @@
                                 {% endif %}
                                 {% if perms.myapp.change_producto %}
                                     <button class="bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-900 focus:ring-2 focus:ring-white"
-                                        onclick="openModalEditarProducto('{{ producto.id }}', '{{ producto.nombre.nombre }}', '{{ producto.categoria.id }}','{{ producto.marca.id }}', '{{ producto.estado }}')">
+                                        onclick="openModalEditarProducto('{{ producto.id }}', '{{ producto.nombre }}', '{{ producto.categoria.id }}','{{ producto.marca.id }}', '{{ producto.estado }}')">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
                                 {% endif %}
@@ -108,6 +108,9 @@
                                                 <th class="py-2 px-4">Stock Mínimo</th>
                                                 <th class="py-2 px-4">Estado</th>
                                                 <th class="py-2 px-4">Total Neto</th>
+                                                {% if perms.myapp.change_presentacion %}
+                                                    <th class="py-3 px-6">Acciones</th>
+                                                {% endif %}
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -128,6 +131,13 @@
                                                         {% endif %}
                                                     </td>
                                                     <td class="py-2 px-4">{{ presentacion.total_neto }}</td>
+                                                    {% if perms.myapp.change_presentacion %}
+                                                        <td class="py-2 px-4">
+                                                            <a href="{% url 'editar_presentacion' presentacion.id %}" class="bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-900 focus:ring-2 focus:ring-white">
+                                                                <i class="fa-solid fa-pen-to-square"></i>
+                                                            </a>
+                                                        </td>
+                                                    {% endif %}
                                                 </tr>
                                             {% endfor %}
                                         </tbody>
@@ -144,23 +154,23 @@
             <p class="text-gray-600 text-center">No hay productos registrados.</p>
         {% endif %}
     </div>
-    {% if productos_marca_categoria.paginator.num_pages > 1 %}
+    {% if productos.paginator.num_pages > 1 %}
         <div class="flex justify-center mt-6">
-            {% if productos_marca_categoria.has_previous %}
+            {% if productos.has_previous %}
                 <a href="?page=1{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
                 class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Primera</a>
-                <a href="?page={{ productos_marca_categoria.previous_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
+                <a href="?page={{ productos.previous_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
                 class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Anterior</a>
             {% endif %}
 
             <span class="px-3 py-2 mx-1 border rounded-lg bg-gray-800 text-white">
-                Página {{ productos_marca_categoria.number }} de {{ productos_marca_categoria.paginator.num_pages }}
+                Página {{ productos.number }} de {{ productos.paginator.num_pages }}
             </span>
 
-            {% if productos_marca_categoria.has_next %}
-                <a href="?page={{ productos_marca_categoria.next_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
+            {% if productos.has_next %}
+                <a href="?page={{ productos.next_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
                 class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Siguiente</a>
-                <a href="?page={{ productos_marca_categoria.paginator.num_pages }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
+                <a href="?page={{ productos.paginator.num_pages }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar }}{% endif %}" 
                 class="px-3 py-2 mx-1 border rounded-lg bg-gray-200 hover:bg-gray-300">Última</a>
             {% endif %}
         </div>
@@ -170,48 +180,32 @@
 <div id="modalEditarProducto" class="fixed inset-0 hidden bg-gray-900 bg-opacity-50 items-center justify-center">
     <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
         <h2 class="text-xl font-bold mb-4">Editar Producto</h2>
-        <form id="formEditarProducto" method="POST" action="{% url 'editar_producto' 0 %}">
+        <form id="formEditarProducto" method="POST" action="">
             {% csrf_token %}
             <input type="hidden" id="producto_id" name="id">
             <div class="mb-4">
                 <label for="nombre_producto" class="block text-gray-700">Nombre</label>
-                <input type="text" id="nombre_producto" name="nombre" class="w-full border rounded px-3 py-2" value="{{ form.nombre.value|default:'' }}">
-                {% if form.nombre.errors %}
-                    <p class="text-red-500 text-sm">{{ form.nombre.errors.0 }}</p>
-                {% endif %}
+                <input type="text" id="nombre_producto" name="nombre" class="w-full border rounded px-3 py-2">
             </div>
             <div class="mb-4">
                 <label for="categoria_producto" class="block text-gray-700">Categoría</label>
                 <select id="categoria_producto" name="categoria" class="w-full border rounded px-3 py-2">
                     {% for categoria in categorias %}
-                        <option value="{{ categoria.id }}" {% if form.categoria.value == categoria.id|stringformat:"s" %}selected{% endif %}>
-                            {{ categoria.nombre }}
-                        </option>
+                        <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
                     {% endfor %}
                 </select>
-                {% if form.categoria.errors %}
-                    <p class="text-red-500 text-sm">{{ form.categoria.errors.0 }}</p>
-                {% endif %}
             </div>
             <div class="mb-4">
                 <label for="marca_producto" class="block text-gray-700">Marca</label>
                 <select id="marca_producto" name="marca" class="w-full border rounded px-3 py-2">
                     {% for marca in marcas %}
-                        <option value="{{ marca.id }}" {% if form.marca.value == marca.id|stringformat:"s" %}selected{% endif %}>
-                            {{ marca.nombre }}
-                        </option>
+                        <option value="{{ marca.id }}">{{ marca.nombre }}</option>
                     {% endfor %}
                 </select>
-                {% if form.marca.errors %}
-                    <p class="text-red-500 text-sm">{{ form.marca.errors.0 }}</p>
-                {% endif %}
             </div>
             <div class="mb-4 flex items-center">
-                <input type="checkbox" id="estado_producto" name="estado" class="mr-2" {% if form.estado.value %}checked{% endif %}>
+                <input type="checkbox" id="estado_producto" name="estado" class="mr-2">
                 <label for="estado_producto" class="text-gray-700">Activo</label>
-                {% if form.estado.errors %}
-                    <p class="text-red-500 text-sm">{{ form.estado.errors.0 }}</p>
-                {% endif %}
             </div>
             <div class="flex justify-end space-x-4">
                 <button type="button" onclick="cerrarModalEditarProducto()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancelar</button>
@@ -220,6 +214,7 @@
         </form>
     </div>
 </div>
+
 
 <!-- Modal para Ver Presentaciones -->
 <div id="modalPresentaciones" class="fixed inset-0 hidden bg-gray-900 bg-opacity-50 items-center justify-center">
@@ -252,7 +247,6 @@
         let estadoCheckbox = document.getElementById('estado_producto');
         let form = document.getElementById('formEditarProducto');
     
-        // Llenar el formulario con los datos del producto
         document.getElementById('producto_id').value = id;
         nombreInput.value = nombre;
     
@@ -266,18 +260,14 @@
     
         estadoCheckbox.checked = (estado.toString().toLowerCase() === 'true');
     
-        // Actualizar la acción del formulario con el ID correcto
+        // ✅ Generar la URL correctamente
         form.action = `/productos/editar/${id}/`;
+        console.log(`URL generada: ${form.action}`); // Depuración
     
-        // Mostrar el modal
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
     
-    function cerrarModalEditarProducto() {
-        let modal = document.getElementById('modalEditarProducto');
-        modal.classList.add('hidden');
-    }
     function cerrarModalEditarProducto() {
         let modal = document.getElementById('modalEditarProducto');
         modal.classList.add('hidden');

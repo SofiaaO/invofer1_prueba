@@ -3,7 +3,7 @@
 {% block title %}Lista de Proveedores{% endblock %}
 
 {% block content %}
-<div class="container mx-auto py-8">
+<div class="container mx-auto py-8 pl-5">
     {% if messages %}
         <div id="messages-container" class="fixed top-21 right-11 space-y-2">
             {% for message in messages %}
@@ -97,15 +97,26 @@
                                         <div class="space-y-4">
                                             <div class="mb-4">
                                                 <label class="block text-sm font-medium text-gray-700">Rif</label>
-                                                <input type="text" name="rif" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" value="{{ proveedor.rif }}" required>
+                                                <input type="text" name="rif" id="rif"
+                                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" 
+                                                    value="{{ proveedor.rif }}" required>
+                                                    <p id="rif-error" class="text-red-500 text-sm hidden">Formato inválido. Ejemplo: V32418434-8</p>
                                             </div>
                                             <div class="mb-4">
                                                 <label class="block text-sm font-medium text-gray-700">Nombre</label>
-                                                <input type="text" name="nombre" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" value="{{ proveedor.nombre }}" required>
+                                                <input type="text" name="nombre" 
+                                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" 
+                                                    value="{{ proveedor.nombre }}" required
+                                                    pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" 
+                                                    oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '')">
                                             </div>
                                             <div class="mb-4">
                                                 <label class="block text-sm font-medium text-gray-700">Teléfono</label>
-                                                <input type="text" name="telefono" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" value="{{ proveedor.telefono }}" required>
+                                                <input type="text" name="telefono" 
+                                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" 
+                                                    value="{{ proveedor.telefono }}" required
+                                                    required pattern="\d{11}" title="Debe tener exactamente 11 dígitos">
+                                                <p class="text-red-500 text-xs mt-1 hidden" id="errorTelefono">El teléfono debe tener exactamente 11 dígitos.</p>
                                             </div>
                                             <div class="mb-4">
                                                 <label class="block text-sm font-medium text-gray-700">Estado</label>
@@ -120,15 +131,15 @@
                                         <div class="space-y-4">
                                             <div class="mb-4">
                                                 <label class="block text-sm font-medium text-gray-700">Dirección</label>
-                                                <textarea name="direccion" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">{{ proveedor.direccion }}</textarea>
+                                                <textarea name="direccion" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required>{{ proveedor.direccion }}</textarea>
                                             </div>
                                             <div class="mb-4">
                                                 <label class="block text-sm font-medium text-gray-700">Dirección Fiscal</label>
-                                                <textarea name="direccion_fiscal" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">{{ proveedor.direccion_fiscal }}</textarea>
+                                                <textarea name="direccion_fiscal" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required>{{ proveedor.direccion_fiscal }}</textarea>
                                             </div>
                                             <div class="mb-4">
                                                 <label class="block text-sm font-medium text-gray-700">Productos Ofrecidos</label>
-                                                <textarea name="productos_ofrecidos" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">{{ proveedor.productos_ofrecidos }}</textarea>
+                                                <textarea name="productos_ofrecidos" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required>{{ proveedor.productos_ofrecidos }}</textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -175,16 +186,24 @@
                 <div class="space-y-4">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">RIF</label>
-                        <input type="text" name="rif" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required>
+                        <input type="text" name="rif" id="rif" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required>
+                        <p id="rif-error" class="text-red-500 text-sm hidden">Formato inválido. Ejemplo: V32418434-8</p>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Nombre</label>
-                        <input type="text" name="nombre" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required>
+                        <input type="text" name="nombre" 
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"                     
+                            pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" 
+                            oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '')" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Teléfono</label>
-                        <input type="text" name="telefono" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required>
+                        <input type="text" name="telefono" 
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required
+                            required pattern="\d{11}" title="Debe tener exactamente 11 dígitos">
+                        <p class="text-red-500 text-xs mt-1 hidden" id="errorTelefono">El teléfono debe tener exactamente 11 dígitos.</p>
                     </div>
+                    
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Estado</label>
                         <input 
@@ -206,7 +225,7 @@
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Productos Ofrecidos</label>
-                        <textarea name="productos_ofrecidos" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"></textarea>
+                        <textarea name="productos_ofrecidos" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required></textarea>
                     </div>
                 </div>
             </div>
@@ -228,6 +247,19 @@
                 setTimeout(() => message.remove(), 500); 
             });
         }, 5000); 
+    });
+    document.getElementById("rif").addEventListener("input", function() {
+        let rifInput = this.value.toUpperCase(); 
+        let rifPattern = /^[VEJ]-\d{8}-\d$/; 
+        let errorMessage = document.getElementById("rif-error");
+
+        if (rifPattern.test(rifInput)) {
+            this.classList.remove("border-red-500");
+            errorMessage.classList.add("hidden");
+        } else {
+            this.classList.add("border-red-500");
+            errorMessage.classList.remove("hidden");
+        }
     });
     function openModalNuevoProveedor() {
         let modal = document.getElementById('modalNuevoProveedor');

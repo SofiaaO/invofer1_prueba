@@ -3,7 +3,7 @@
 {% block title %}Lista de Compras{% endblock %}
 
 {% block content %}
-<div class="container mx-auto py-8">
+<div class="container mx-auto py-8 pl-5">
     <h2 class="text-4xl font-bold mb-6 mt-6 text-gray-800">Lista de Compras</h2>
 
     <div class="flex justify-between items-center mb-6">
@@ -45,7 +45,8 @@
                         <th class="py-3 px-6 text-left">Compra Nº</th>
                         <th class="py-3 px-6 text-left">Proveedor</th>
                         <th class="py-3 px-6 text-left">Fecha</th>
-                        <th class="py-3 px-6 text-left">Total</th>
+                        <th class="py-3 px-6 text-left">Total ($)</th>
+                        <th class="py-3 px-6 text-left">Total (Bs)</th>
                         <th class="py-3 px-6 text-left">Acciones</th>
                     </tr>
                 </thead>
@@ -56,25 +57,26 @@
                         <td class="py-3 px-6">{{ compra.proveedor.nombre }}</td>
                         <td class="py-3 px-6">{{ compra.fecha_compra|date:"d/m/Y H:i" }}</td>
                         <td class="py-3 px-6">${{ compra.total }}</td>
+                        <td class="py-3 px-6">Bs {{ compra.total_bs }}</td>
                         <td class="py-3 px-6">
                             <div class="flex space-x-2">
                                 <button class="bg-yellow-600 text-white px-2 py-2 rounded-lg hover:bg-yellow-500"
                                     onclick="openModal({{ compra.id_compra }})">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
-                                {% if perms.myapp.change_compras%}
+                                {% comment %} {% if perms.myapp.change_compras%}
                                     <button 
                                         class="bg-gray-800 text-white px-2 py-2 rounded-lg hover:bg-gray-900 focus:ring-2 focus:ring-white"
                                         onclick=""
                                     >
                                     <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
-                                {% endif %}
-                                <button 
+                                {% endif %} {% endcomment %}
+                                {% comment %} <button 
                                     class="bg-red-500 text-white px-2 py-2 text-sm rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-400"
                                     onclick=""
                                 ><i class="fa-solid fa-file-invoice-dollar fa-lg"></i>
-                                </button>
+                                </button> {% endcomment %}
                             </div>
                         </td>
                     </tr>
@@ -85,10 +87,10 @@
             <p class="text-gray-600 text-center">No hay compras registradas.</p>
         {% endif %}
         <div id="detalleCompraModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center">
-            <div class="bg-white w-1/2 p-6 rounded-lg shadow-lg">
+            <div class="bg-white w-11/12 md:w-3/4 lg:w-2/3 p-6 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto">
                 <h3 class="text-lg font-bold mb-4">Detalles de la Compra</h3>
                 <div id="detalleCompraContent">
-                    <!-- Los detalles de la venta se cargarán aquí -->
+                    <!-- Los detalles de la compra se cargarán aquí -->
                 </div>
                 <div class="flex justify-end mt-4">
                     <button onclick="closeModal()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400">Cerrar</button>
@@ -108,27 +110,34 @@
                     <p><strong>Factura Nº:</strong> ${data.numero_factura}</p>
                     <p><strong>Proveedor:</strong> ${data.proveedor}</p>
                     <p><strong>Fecha:</strong> ${data.fecha_compra}</p>
-                    <p><strong>Total:</strong> $${data.total}</p>
-                    <table class="min-w-full bg-white border border-gray-200 mt-4">
-                        <thead class="bg-gray-800 text-white">
-                            <tr>
-                                <th class="py-3 px-6 text-left">Presentación</th>
-                                <th class="py-3 px-6 text-left">Cantidad</th>
-                                <th class="py-3 px-6 text-left">Precio Unitario</th>
-                                <th class="py-3 px-6 text-left">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.detalles.map(detalle => `
+                    <p><strong>Total ($):</strong> $${data.total}</p>
+                    <p><strong>Total (Bs):</strong> Bs ${data.total_bs}</p>
+                    <div class="overflow-x-auto mt-4">
+                        <table class="min-w-full bg-white border border-gray-200">
+                            <thead class="bg-gray-800 text-white">
                                 <tr>
-                                    <td class="py-3 px-6">${detalle.presentacion}</td>
-                                    <td class="py-3 px-6">${detalle.cantidad}</td>
-                                    <td class="py-3 px-6">$${detalle.precio_unitario}</td>
-                                    <td class="py-3 px-6">$${detalle.subtotal}</td>
+                                    <th class="py-3 px-4 text-left">Presentación</th>
+                                    <th class="py-3 px-4 text-left">Cantidad</th>
+                                    <th class="py-3 px-4 text-left">Precio Unitario ($)</th>
+                                    <th class="py-3 px-4 text-left">Precio Unitario (Bs)</th>
+                                    <th class="py-3 px-4 text-left">Subtotal ($)</th>
+                                    <th class="py-3 px-4 text-left">Subtotal (Bs)</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                ${data.detalles.map(detalle => `
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-3 px-4">${detalle.presentacion}</td>
+                                        <td class="py-3 px-4">${detalle.cantidad}</td>
+                                        <td class="py-3 px-4">$${detalle.precio_unitario}</td>
+                                        <td class="py-3 px-4">Bs ${detalle.precio_unitario_bs}</td>
+                                        <td class="py-3 px-4">$${detalle.subtotal}</td>
+                                        <td class="py-3 px-4">Bs ${detalle.subtotal_bs}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
                 document.getElementById('detalleCompraModal').classList.remove('hidden');
                 document.getElementById('detalleCompraModal').classList.add('flex');

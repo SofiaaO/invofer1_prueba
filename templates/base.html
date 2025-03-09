@@ -162,7 +162,7 @@
     <div class="sidebar" id="sidebar">
         <div class="menu">
             <a class="logo" href="{% url 'dashboard' %}">
-                <img src="{% static 'Invofer.png' %}" alt="LOGO" id="logo" class="absolute top-10 transform -translate-y-1/2 left-1/2 -translate-x-1/2 h-[5rem] w-auto transition-all duration-300">
+                <img src="{% static 'Invofer.png' %}" alt="LOGO" id="logo" class="absolute top-5 transform -translate-y-1/2 left-1/2 -translate-x-1/2 h-[5rem] w-auto transition-all duration-300">
             </a>
 
             <div>
@@ -267,9 +267,17 @@
                             <button class="submenu-item" style="width: 100%; text-align: left;" onclick="window.location.href='{% url 'Gestionar Impuestos'%}';">
                             Impuestos</button>
                         {% endif %}
-                        <button class="submenu-item" style="width: 100%; text-align: left;" onclick="window.location.href='{% url 'ventas_listar' %}';">
+                        <button class="submenu-item" style="width: 100%; text-align: left;" onclick="window.location.href='{% url 'listar_tasa' %}';">
                         Moneda</button>
                     </div>
+                </div>
+            {% endif %}
+            {% if perms.myapp.view_historicalcliente or  perms.myapp.view_historicalmarca%}
+                <div>
+                    <button class="menu-item" style="width: 100%; text-align: left;" onclick="window.location.href='{% url 'historial_general' %}';">
+                        <i class="fa-solid fa-file-shield"></i>
+                    <span>Auditoria</span>
+                    </button>                
                 </div>
             {% endif %}
         </div>

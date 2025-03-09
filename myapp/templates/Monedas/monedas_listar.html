@@ -1,0 +1,187 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Lista de Tasas de Cambio{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+    <h2 class="text-4xl font-bold mb-6 mt-6 text-gray-800">Lista de Tasas de Cambio</h2>
+
+    <div class="flex justify-between items-center mb-6">
+        <form method="GET" action="" class="flex">
+            <input 
+                type="text" 
+                name="buscar" 
+                placeholder="Buscar tasa..." 
+                class="w-72 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:outline-none"
+                value="{{ request.GET.buscar|default:'' }}"
+            >
+            <button 
+                type="submit" 
+                class="ml-4 bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500"
+            >
+                <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+            </button>
+        </form>
+        <button 
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 focus:ring-2 focus:ring-blue-400 hidden"
+            onclick="openModalNuevaTasa()"
+        >
+            <i class="fa-solid fa-plus"></i> Crear Tasa de Cambio
+        </button>
+    </div>
+
+    <div class="overflow-x-auto shadow-md sm:rounded-lg">
+        {% if tasas %}
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="py-3 px-6 text-left">Moneda Origen</th>
+                        <th class="py-3 px-6 text-left">Moneda Destino</th>
+                        <th class="py-3 px-6 text-left">Tasa</th>
+                        <th class="py-3 px-6 text-left">Fecha</th>
+                        <th class="py-3 px-6 text-left">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700 text-sm">
+                    {% for tasa in tasas %}
+                        <tr class="border-b hover:bg-gray-100">
+                            <td class="py-3 px-6">{{ tasa.moneda_origen.codigo }}</td>
+                            <td class="py-3 px-6">{{ tasa.moneda_destino.codigo }}</td>
+                            <td class="py-3 px-6">{{ tasa.tasa }}</td>
+                            <td class="py-3 px-6">{{ tasa.fecha }}</td>
+                            <td class="py-3 px-6">
+                                <button 
+                                    class="bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-900 focus:ring-2 focus:ring-white"
+                                    onclick="openModalEditarTasa('{{ tasa.id }}', '{{ tasa.tasa }}')"
+                                >
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-gray-600 text-center">No hay tasas de cambio registradas.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal para agregar nueva tasa de cambio -->
+<div id="modalNuevaTasa" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center">
+    <div class="bg-white w-96 p-6 rounded-lg shadow-lg">
+        <!-- Título del Modal -->
+        <h3 class="text-lg font-bold mb-4">Nueva Tasa de Cambio</h3>
+        
+        <form method="POST" action="{% url 'crear_tasa_cambio' %}">
+            {% csrf_token %}
+
+            <!-- Campo: Moneda Origen -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Moneda Origen</label>
+                {{ form.moneda_origen }}
+            </div>
+
+            <!-- Campo: Moneda Destino -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Moneda Destino</label>
+                {{ form.moneda_destino }}
+            </div>
+
+            <!-- Campo: Tasa -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Tasa</label>
+                {{ form.tasa }}
+            </div>
+
+            <!-- Botones -->
+            <div class="flex justify-end">
+                <button 
+                    type="button" 
+                    class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 mr-2"
+                    onclick="closeModalNuevaTasa()"
+                >
+                    Cancelar
+                </button>
+                <button 
+                    type="submit" 
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
+                >
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para editar tasa de cambio -->
+<div id="modalEditarTasa" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center">
+    <div class="bg-white w-96 p-6 rounded-lg shadow-lg">
+        <!-- Título del Modal -->
+        <h3 class="text-lg font-bold mb-4">Editar Tasa de Cambio</h3>
+        
+        <form id="formEditarTasa" method="POST" action="">
+            {% csrf_token %}
+
+            <!-- Campo: Tasa -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Tasa</label>
+                <input 
+                    type="number" 
+                    id="editarTasa" 
+                    name="tasa" 
+                    step="0.01" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                >
+            </div>
+
+            <!-- Botones -->
+            <div class="flex justify-end">
+                <button 
+                    type="button" 
+                    class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 mr-2"
+                    onclick="closeModalEditarTasa()"
+                >
+                    Cancelar
+                </button>
+                <button 
+                    type="submit" 
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
+                >
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Funciones para el modal de nueva tasa
+    function openModalNuevaTasa() {
+        document.getElementById('modalNuevaTasa').classList.remove('hidden');
+        document.getElementById('modalNuevaTasa').classList.add('flex');
+    }
+
+    function closeModalNuevaTasa() {
+        document.getElementById('modalNuevaTasa').classList.remove('flex');
+        document.getElementById('modalNuevaTasa').classList.add('hidden');
+    }
+
+    // Funciones para el modal de editar tasa
+    function openModalEditarTasa(id, tasa) {
+        // Configurar el formulario de edición
+        document.getElementById('formEditarTasa').action = `/editar-tasa/${id}/`;
+        document.getElementById('editarTasa').value = tasa;
+
+        // Mostrar el modal
+        document.getElementById('modalEditarTasa').classList.remove('hidden');
+        document.getElementById('modalEditarTasa').classList.add('flex');
+    }
+
+    function closeModalEditarTasa() {
+        document.getElementById('modalEditarTasa').classList.remove('flex');
+        document.getElementById('modalEditarTasa').classList.add('hidden');
+    }
+</script>
+{% endblock %}

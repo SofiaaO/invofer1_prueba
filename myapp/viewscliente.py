@@ -5,10 +5,11 @@ from myapp.forms import *
 # Create your views here.
 from django.db.models import Q
 from django.core.paginator import Paginator
-
+from django.contrib.auth.decorators import login_required
+@login_required
 def listar_clientes(request):
     query = request.GET.get('buscar', '')
-    clientes_list = Cliente.objects.all().order_by('nombre')
+    clientes_list = Cliente.objects.all().order_by('-fecha_registro')
 
     if query:
         clientes_list = clientes_list.filter(
@@ -21,6 +22,7 @@ def listar_clientes(request):
 
     return render(request, 'Clientes/clientes_list.html', {'clientes': clientes})
 
+@login_required
 def Crear_Clientes2(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
@@ -29,6 +31,8 @@ def Crear_Clientes2(request):
         return redirect('nueva_venta')  
     else:
         form = ClienteForm()   
+
+@login_required
 def Crear_Clientes(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
@@ -40,6 +44,8 @@ def Crear_Clientes(request):
         messages.error(request, "Corrige los errores en el formulario.")
         form = ClienteForm()
 
+
+@login_required
 def editar_cliente(request, id):
     cliente = get_object_or_404(Cliente, id=id)  
 

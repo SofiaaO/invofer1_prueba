@@ -18,42 +18,63 @@
             <div class="p-5">
                 <form method="post" action="{% url 'guardar_venta' %}" id="form-guardar-venta">
                     {% csrf_token %}
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Cliente -->
-                        <div>
-                            <label for="cliente_id" class="block text-sm font-medium text-gray-700 mb-2">Cliente</label>
-                            <div class="flex items-center gap-2">
-                                <select name="cliente_id" id="cliente_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                    <option value="" selected>Selecciona Cliente</option>
-                                    {% for cliente in clientes %}
-                                        <option value="{{ cliente.cedula }}" {% if request.session.cliente_id == cliente.cedula %}selected{% endif %}>
-                                            {{ cliente.nombre }} {{ cliente.apellido }} - {{ cliente.cedula }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <button
-                                    type="button"
-                                    onclick="openModalNuevoCliente()"
-                                    class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-500 transition duration-300"
-                                >
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
+                    <!-- Contenedor responsive con 2 columnas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                        <!-- Columna 1: Cliente y Moneda -->
+                        <div class="space-y-4">
+                            <!-- Cliente -->
+                            <div class="w-full">
+                                <label for="cliente_id" class="block text-sm font-medium text-gray-700 mb-2">Cliente</label>
+                                <div class="flex items-center gap-2">
+                                    <select name="cliente_id" id="cliente_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                        <option value="" selected>Selecciona Cliente</option>
+                                        {% for cliente in clientes %}
+                                            <option value="{{ cliente.cedula }}" {% if request.session.cliente_id == cliente.cedula %}selected{% endif %}>
+                                                {{ cliente.nombre }} {{ cliente.apellido }} - {{ cliente.cedula }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onclick="openModalNuevoCliente()"
+                                        class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-500 transition duration-300"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+        
+                            <!-- Moneda -->
+                            <div class="w-full">
+                                <label for="moneda" class="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                <div class="flex items-center gap-2">
+                                    <select name="moneda" id="moneda" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        {% for moneda in monedas %}
+                                            <option value="{{ moneda.codigo }}" data-tasa="{{ moneda.tasa }}" {% if moneda.codigo == moneda_seleccionada %}selected{% endif %}>
+                                                {{ moneda.codigo }} ({{ moneda.simbolo }}) 
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Fecha -->
-                        <div>
-                            <label for="fecha" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
-                            <input type="text" id="fecha" value="{{ current_date }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
-                        </div>
-
-                        <!-- Factura N° -->
-                        <div>
-                            <label for="factura" class="block text-sm font-medium text-gray-700 mb-2">Factura Nº</label>
-                            <input type="text" id="factura" value="{{ numero_factura }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
+        
+                        <!-- Columna 2: Fecha y Factura N° -->
+                        <div class="space-y-4">
+                            <!-- Fecha -->
+                            <div class="w-full">
+                                <label for="fecha" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                                <input type="text" id="fecha" value="{{ current_date }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
+                            </div>
+        
+                            <!-- Factura N° -->
+                            <div class="w-full">
+                                <label for="factura" class="block text-sm font-medium text-gray-700 mb-2">Factura Nº</label>
+                                <input type="text" id="factura" value="{{ numero_factura }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
+                            </div>
                         </div>
                     </div>
-
+        
                     <!-- Botón para finalizar la venta -->
                     <div class="flex justify-end mt-6">
                         <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition duration-300">
@@ -63,6 +84,7 @@
                 </form>
             </div>
         </div>
+        
 
         <!-- Carrito de Compras -->
         <div class="bg-white shadow-lg rounded-lg mt-8">
@@ -83,7 +105,9 @@
                             <th class="px-4 py-3 text-left text-md font-semibold text-white">Producto</th>
                             <th class="px-4 py-3 text-left text-md font-semibold text-white">Cantidad</th>
                             <th class="px-4 py-3 text-left text-md font-semibold text-white">Precio Unitario</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Precio Unitario Bs</th>
                             <th class="px-4 py-3 text-left text-md font-semibold text-white">Subtotal</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Subtotal Bs</th>
                             <th class="px-4 py-3 text-left text-md font-semibold text-white">Acciones</th>
                         </tr>
                     </thead>
@@ -99,8 +123,10 @@
                                     <button onclick="actualizarCantidad({{ item.id }}, 1)" class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-300 transition duration-300">+</button>
                                 </div>
                             </td>
-                            <td class="px-4 py-3">${{ item.precio }}</td>
+                            <td class="px-4 py-3 precio" data-id="{{ item.id }}">${{ item.precio }}</td>
+                            <td class="px-4 py-3 precio-bs" data-id="{{ item.id }}">Bs {{ item.precio_bs|floatformat:2 }}</td>
                             <td class="px-4 py-3 subtotal" data-id="{{ item.id }}">${{ item.subtotal|floatformat:2 }}</td>
+                            <td class="px-4 py-3 subtotal-bs" data-id="{{ item.id }}">Bs {{ item.subtotal_bs|floatformat:2 }}</td>
                             <td class="px-4 py-3">
                                 <form method="post" action="{% url 'eliminar_producto' %}">
                                     {% csrf_token %}
@@ -118,8 +144,28 @@
         </div>
 
         <!-- Resumen de la venta -->
-        <div class="flex justify-end mt-8">
-            <h3 class="text-2xl font-bold text-green-600 total">Total: ${{ total|floatformat:2 }}</h3>
+        <div class="flex flex-col items-end mt-8">
+            <!-- Fila de Tasa e Impuesto -->
+            <div class="flex justify-between w-full">
+                <!-- Tasa de cambio -->
+                <h3 class="text-2xl font-bold text-green-600">Tasa: {{ tasa.tasa|floatformat:2 }}</h3>
+        
+                <!-- Impuesto -->
+                <div class="flex">
+                    <h3 class="text-2xl font-bold text-green-600 impuesto">
+                        Impuesto ({{ impuesto_activo.nombre }} - {{ impuesto_activo.porcentaje }}%): $<span class="impuesto">{{ impuesto|floatformat:2 }}</span>
+                    </h3>
+                    <h3 class="text-2xl font-bold text-green-600 ml-4 impuesto-bs">
+                        Impuesto ({{ impuesto_activo.nombre }} - {{ impuesto_activo.porcentaje }}%): Bs <span class="impuesto-bs">{{ impuesto_bs|floatformat:2 }}</span>
+                    </h3>
+                </div>
+            </div>
+        
+            <!-- Total con impuesto -->
+            <div>
+                <h3 class="text-2xl font-bold text-green-600 total-con-impuesto">Total: ${{ total_con_impuesto|floatformat:2 }}</h3>
+                <h3 class="text-2xl font-bold text-green-600 total-con-impuesto-bs">Total: Bs {{ total_con_impuesto_bs|floatformat:2 }}</h3>
+            </div>
         </div>
     </div>
 
@@ -137,34 +183,34 @@
                 <table class="w-full table-auto">
                     <thead style="background-color:#42638f">
                         <tr>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Código</th>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Presentación</th>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Stock</th>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Precio</th>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Cantidad</th>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white"></th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-1/12">Código</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-5/12">Presentación</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-2/12">Stock</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-2/12">Precio</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-1/12">Cantidad</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-1/12"></th>
                         </tr>
                     </thead>
                     <tbody id="productosTableBody">
                         {% for presentacion in presentaciones %}
-                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition duration-300">
-                            <td class="px-4 py-3">{{ presentacion.codigo }}</td>
-                            <td class="px-4 py-3">{{ presentacion.producto.nombre }} - {{ presentacion.valor }} {{ presentacion.categoria_unidad.unidad_medida.nombre }}</td>
-                            <td class="px-4 py-3">{{ presentacion.stock }}</td>
-                            <td class="px-4 py-3">${{ presentacion.precio_compra }}</td>
-                            <form method="post" action="{% url 'agregar_producto' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="id_presentacion" value="{{ presentacion.id }}">
-                                <td class="px-4 py-3">
-                                    <input type="number" name="cantidad" value="1" min="1" class="w-full px-2 py-1 border border-gray-300 rounded-lg" readonly>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition duration-300">
-                                        <i class="fa-solid fa-cart-plus"></i>
-                                    </button>
-                                </td>
-                            </form>
-                        </tr>
+                            <tr class="border-b border-gray-200 hover:bg-gray-50 transition duration-300">
+                                <td class="px-4 py-3">{{ presentacion.codigo }}</td>
+                                <td class="px-4 py-3">{{ presentacion.producto.nombre }} ({{ presentacion.producto.marca }}) - {{ presentacion.valor }} {{ presentacion.categoria_unidad.unidad_medida.abreviatura }}</td>
+                                <td class="px-4 py-3">{{ presentacion.stock }}</td>
+                                <td class="px-4 py-3">${{ presentacion.precio_venta }}</td>
+                                <form method="post" action="{% url 'agregar_producto' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id_presentacion" value="{{ presentacion.id }}">
+                                    <td class="px-2 py-3">
+                                        <input type="number" name="cantidad" value="1" min="1" max="{{ presentacion.stock }}" class="w-full px-2 py-1 border border-gray-300 rounded-lg" readonly>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition duration-300 {% if presentacion.stock < 1 %}opacity-50 cursor-not-allowed{% endif %}" {% if presentacion.stock < 1 %}disabled{% endif %}>
+                                            <i class="fa-solid fa-cart-plus"></i>
+                                        </button>
+                                    </td>
+                                </form>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -185,28 +231,45 @@
                     {% csrf_token %}
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Cédula</label>
-                        <input type="text" name="cedula" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        <input type="text" name="cedula" id="id_cedula" 
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required
+                            required pattern="\d{7,8}" title="Debe tener entre 7 y 8 dígitos">
+                        <p class="text-red-500 text-xs mt-1 hidden" id="errorCedula">La cédula debe tener entre 7 y 8 dígitos.</p>
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Nombre</label>
-                        <input type="text" name="nombre" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        <input type="text" name="nombre" 
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
+                            pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" 
+                            oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '')" required
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Teléfono</label>
-                        <input type="text" name="telefono" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        <input type="text" name="telefono" id="id_telefono"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required
+                            required pattern="\d{11}" title="Debe tener exactamente 11 dígitos">
+                        <p class="text-red-500 text-xs mt-1 hidden" id="errorTelefono">El teléfono debe tener exactamente 11 dígitos.</p>
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Dirección</label>
-                        <textarea name="direccion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                        <textarea name="direccion" id="id_direccion"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required></textarea>
+                        <p class="text-red-500 text-xs mt-1 hidden" id="errorDireccion">La dirección es obligatoria.</p>
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700">Estado</label>
                         <input type="checkbox" name="estado" class="form-check-input" checked> Activo
                     </div>
+
                     <div class="flex justify-end">
-                        <button type="button" onclick="closeModalNuevoUsuario()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-300 mr-2">Cancelar</button>
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">Guardar</button>
+                        <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 mr-2" onclick="closeModalNuevoUsuario()">Cancelar</button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500">Guardar</button>
                     </div>
+
                 </form>
             </div>
         </div>
@@ -305,13 +368,13 @@
         function actualizarCantidad(id, cambio) {
             let cantidadElement = document.querySelector(`.cantidad[data-id="${id}"]`);
             let cantidadActual = parseInt(cantidadElement.textContent);
-
+        
             let nuevaCantidad = cantidadActual + cambio;
-
+        
             if (nuevaCantidad < 1) {
                 nuevaCantidad = 1;
             }
-
+        
             fetch("/ventas/editar-cantidad/", {
                 method: "POST",
                 headers: {
@@ -323,23 +386,63 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Actualizar la cantidad
                     cantidadElement.textContent = data.cantidad;
-
+        
+                    // Actualizar el subtotal
                     let subtotalElement = document.querySelector(`.subtotal[data-id="${id}"]`);
                     if (subtotalElement) {
-                        subtotalElement.textContent = `$${data.subtotal.toFixed(2)}`;
+                        subtotalElement.textContent = `$ ${data.subtotal.toFixed(2)}`;
                     }
-
+        
+                    // Actualizar el subtotal en bolívares
+                    let subtotalBsElement = document.querySelector(`.subtotal-bs[data-id="${id}"]`);
+                    if (subtotalBsElement) {
+                        subtotalBsElement.textContent = `Bs ${data.subtotal_bs.toFixed(2)}`;
+                    }
+        
+                    // Actualizar el total
                     let totalElement = document.querySelector('.total');
                     if (totalElement) {
-                        totalElement.textContent = `Total: $${data.total.toFixed(2)}`;
+                        totalElement.textContent = `$ ${data.total.toFixed(2)}`;
+                    }
+        
+                    // Actualizar el total en bolívares
+                    let totalBsElement = document.querySelector('.total-bs');
+                    if (totalBsElement) {
+                        totalBsElement.textContent = `Bs ${data.total_bs.toFixed(2)}`;
+                    }
+        
+                    // Actualizar el impuesto
+                    let impuestoElement = document.querySelector('.impuesto');
+                    if (impuestoElement) {
+                        impuestoElement.textContent = `Impuesto (${data.impuesto_nombre} - ${data.impuesto_porcentaje}%): $${data.impuesto.toFixed(2)}`;
+                    }
+        
+                    // Actualizar el impuesto en bolívares
+                    let impuestoBsElement = document.querySelector('.impuesto-bs');
+                    if (impuestoBsElement) {
+                        impuestoBsElement.textContent = `Impuesto (${data.impuesto_nombre} - ${data.impuesto_porcentaje}%): Bs ${data.impuesto_bs.toFixed(2)}`;
+                    }
+        
+                    // Actualizar el total con impuesto
+                    let totalConImpuestoElement = document.querySelector('.total-con-impuesto');
+                    if (totalConImpuestoElement) {
+                        totalConImpuestoElement.textContent = `Total $ ${data.total_con_impuesto.toFixed(2)}`;
+                    }
+        
+                    // Actualizar el total con impuesto en bolívares
+                    let totalConImpuestoBsElement = document.querySelector('.total-con-impuesto-bs');
+                    if (totalConImpuestoBsElement) {
+                        totalConImpuestoBsElement.textContent = `Total Bs ${data.total_con_impuesto_bs.toFixed(2)}`;
                     }
                 } else {
-                    alert("Error al actualizar la cantidad");
+                    alert(data.error || "Error al actualizar la cantidad");
+                    cantidadElement.textContent = cantidadActual; // Revertir la cantidad si hay un error
                 }
             });
         }
-
+        
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -352,6 +455,7 @@
             }
             return cookieValue;
         }
+
         document.getElementById('form-guardar-venta').addEventListener('submit', function(event) {
             event.preventDefault();  
             fetch(this.action, {
@@ -364,18 +468,48 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const pdfWindow = window.open(data.factura_url, '_blank', 'width=800,height=600');
-    
-                    window.location.href = "{% url 'nueva_venta' %}";
+                    // Mostrar alertas de stock mínimo si las hay
+                    if (data.alertas_stock_minimo && data.alertas_stock_minimo.length > 0) {
+                        // Mostrar todas las alertas en una sola ventana de SweetAlert2
+                        Swal.fire({
+                            title: 'Alerta de Stock Mínimo',
+                            html: data.alertas_stock_minimo.join('<br>'),  // Unir las alertas con saltos de línea
+                            icon: 'warning',
+                            confirmButtonText: 'Entendido'
+                        }).then(() => {
+                            // Después de cerrar la alerta, abrir la factura y redirigir
+                            const pdfWindow = window.open(data.factura_url, '_blank', 'width=800,height=600');
+                            window.location.href = "{% url 'nueva_venta' %}";
+                        });
+                    } else {
+                        // Si no hay alertas, abrir la factura y redirigir directamente
+                        const pdfWindow = window.open(data.factura_url, '_blank', 'width=800,height=600');
+                        window.location.href = "{% url 'nueva_venta' %}";
+                    }
                 } else {
-                    alert("Hubo un error al guardar la venta: " + data.error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: "Hubo un error al guardar la venta: " + data.error,
+                        icon: 'error',
+                        confirmButtonText: 'Entendido'
+                    });
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert("Hubo un error al procesar la solicitud.");
+                Swal.fire({
+                    title: 'Error',
+                    text: "Hubo un error al procesar la solicitud.",
+                    icon: 'error',
+                    confirmButtonText: 'Entendido'
+                });
             });
         });
         
+        document.addEventListener('DOMContentLoaded', function() {
+            const monedaSeleccionada = document.getElementById('moneda').value;
+            const tasa = document.querySelector(`#moneda option[value="${monedaSeleccionada}"]`).getAttribute('data-tasa');
+            document.getElementById('tasa-cambio').textContent = `Tasa: ${tasa}`;
+        });
     </script>
 {% endblock %}

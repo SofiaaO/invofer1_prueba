@@ -3,7 +3,7 @@
 {% block title %}Asignar Unidades a Categorías{% endblock %}
 
 {% block content %}
-<div class="container mx-auto py-8">
+<div class="container mx-auto py-8 pl-5">
 
     {% if messages %}
         {% for message in messages %}
@@ -13,7 +13,7 @@
         {% endfor %}
     {% endif %}
     {% if perms.myapp.add_categoriaunidadmedida %}
-        <h2 class="text-4xl font-bold mb-6 mt-6 text-gray-800">Asignar Unidades de Medida a Categorías</h2>
+        <h2 class="text-4xl font-bold mb-6 mt-6 text-gray-800 ">Asignar Unidades de Medida a Categorías</h2>
         <form method="POST" class="bg-white shadow-md rounded-lg p-6">
             {% csrf_token %}
         

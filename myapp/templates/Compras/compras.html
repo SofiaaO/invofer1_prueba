@@ -12,47 +12,68 @@
         <!-- Detalles de la Factura -->
         <div class="bg-white shadow-lg rounded-lg">
             <div class="p-5 rounded-t-lg border-b border-blue-200" style="background-color:#42638f">
-                <h5 class="text-xl font-semibold text-white">Detalles de la Factura</h5>
+                <h5 class="text-xl font-semibold text-white">Detalles de la Compra</h5>
             </div>
             <div class="p-5">
                 <form method="post" action="{% url 'guardar_compra' %}" id="form-guardar-compra">
                     {% csrf_token %}
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Proveedor -->
-                        <div>
-                            <label for="proveedor_id" class="block text-sm font-medium text-gray-700 mb-2">Proveedor</label>
-                            <div class="flex items-center gap-2">
-                                <select name="proveedor_id" id="proveedor_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                    <option value="" selected>Selecciona Proveedor</option>
-                                    {% for proveedor in proveedores %}
-                                        <option value="{{ proveedor.rif }}" {% if request.session.proveedor_id == proveedor.rif %}selected{% endif %}>
-                                            {{ proveedor.nombre }} - {{ proveedor.rif }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <button
-                                    type="button"
-                                    onclick="openModalNuevoProveedor()"
-                                    class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-500 transition duration-300"
-                                >
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
+                    <!-- Contenedor responsive con 2 columnas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                        <!-- Columna 1: Proveedor y Moneda -->
+                        <div class="space-y-4">
+                            <!-- Proveedor -->
+                            <div class="w-full">
+                                <label for="proveedor_id" class="block text-sm font-medium text-gray-700 mb-2">Proveedor</label>
+                                <div class="flex items-center gap-2">
+                                    <select name="proveedor_id" id="proveedor_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                        <option value="" selected>Selecciona Proveedor</option>
+                                        {% for proveedor in proveedores %}
+                                            <option value="{{ proveedor.rif }}" {% if request.session.proveedor_id == proveedor.rif %}selected{% endif %}>
+                                                {{ proveedor.nombre }} - {{ proveedor.rif }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onclick="openModalNuevoProveedor()"
+                                        class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-500 transition duration-300"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+        
+                            <!-- Moneda -->
+                            <div class="w-full">
+                                <label for="moneda" class="block text-sm font-medium text-gray-700 mb-2">Moneda</label>
+                                <div class="flex items-center gap-2">
+                                    <select name="moneda" id="moneda" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        {% for moneda in monedas %}
+                                            <option value="{{ moneda.codigo }}" data-tasa="{{ moneda.tasa }}" {% if moneda.codigo == moneda_seleccionada %}selected{% endif %}>
+                                                {{ moneda.codigo }} ({{ moneda.simbolo }}) 
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Fecha -->
-                        <div>
-                            <label for="fecha" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
-                            <input type="text" id="fecha" value="{{ current_date }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
-                        </div>
-
-                        <!-- Factura N° -->
-                        <div>
-                            <label for="factura" class="block text-sm font-medium text-gray-700 mb-2">Compra Nº</label>
-                            <input type="text" id="factura" value="{{ numero_factura }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
+        
+                        <!-- Columna 2: Fecha y Compra N° -->
+                        <div class="space-y-4">
+                            <!-- Fecha -->
+                            <div class="w-full">
+                                <label for="fecha" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                                <input type="text" id="fecha" value="{{ current_date }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
+                            </div>
+        
+                            <!-- Compra N° -->
+                            <div class="w-full">
+                                <label for="factura" class="block text-sm font-medium text-gray-700 mb-2">Compra Nº</label>
+                                <input type="text" id="factura" value="{{ numero_factura }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
+                            </div>
                         </div>
                     </div>
-
+        
                     <!-- Botón para finalizar la compra -->
                     <div class="flex justify-end mt-6">
                         <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition duration-300">
@@ -82,7 +103,9 @@
                             <th class="px-4 py-3 text-left text-md font-semibold text-white">Producto</th>
                             <th class="px-4 py-3 text-left text-md font-semibold text-white">Cantidad</th>
                             <th class="px-4 py-3 text-left text-md font-semibold text-white">Precio Unitario</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Precio Unitario Bs</th>
                             <th class="px-4 py-3 text-left text-md font-semibold text-white">Subtotal</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Subtotal Bs</th>
                             <th class="px-4 py-3 text-left text-md font-semibold text-white">Acciones</th>
                         </tr>
                     </thead>
@@ -98,8 +121,10 @@
                                     <button onclick="actualizarCantidad({{ item.id }}, 1)" class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-300 transition duration-300">+</button>
                                 </div>
                             </td>
-                            <td class="px-4 py-3">${{ item.precio }}</td>
+                            <td class="px-4 py-3 precio" data-id="{{ item.id }}">${{ item.precio }}</td>
+                            <td class="px-4 py-3 precio-bs" data-id="{{ item.id }}">Bs {{ item.precio_bs|floatformat:2 }}</td>
                             <td class="px-4 py-3 subtotal" data-id="{{ item.id }}">${{ item.subtotal|floatformat:2 }}</td>
+                            <td class="px-4 py-3 subtotal-bs" data-id="{{ item.id }}">Bs {{ item.subtotal_bs|floatformat:2 }}</td>
                             <td class="px-4 py-3">
                                 <form method="post" action="{% url 'eliminar_producto_compra' %}">
                                     {% csrf_token %}
@@ -117,8 +142,12 @@
         </div>
 
         <!-- Resumen de la compra -->
-        <div class="flex justify-end mt-8">
-            <h3 class="text-2xl font-bold text-green-600 total">Total: ${{ total|floatformat:2 }}</h3>
+        <div class="flex flex-col items-end mt-8">
+            <div class="flex">
+                <h3 class="text-2xl font-bold text-green-600 total">Total: ${{ total|floatformat:2 }}</h3>
+                <h3 class="text-2xl font-bold text-green-600 total-bs ml-4">Total: Bs {{ total_bs|floatformat:2 }}</h3>
+            </div>
+            <h3 class="text-2xl font-bold text-green-600 mt-2">Tasa: {{ tasa.tasa|floatformat:2 }}</h3>
         </div>
     </div>
 
@@ -136,25 +165,25 @@
                 <table class="w-full table-auto">
                     <thead style="background-color:#42638f">
                         <tr>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Código</th>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Presentación</th>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Stock</th>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Precio</th>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white">Cantidad</th>
-                            <th class="px-4 py-3 text-left text-md font-semibold text-white"></th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-1/12">Código</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-5/12">Presentación</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-2/12">Stock</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-2/12">Precio</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-1/12">Cantidad</th>
+                            <th class="px-4 py-3 text-left text-md font-semibold text-white w-1/12"></th>
                         </tr>
                     </thead>
                     <tbody id="productosTableBody">
                         {% for presentacion in presentaciones %}
                         <tr class="border-b border-gray-200 hover:bg-gray-50 transition duration-300">
                             <td class="px-4 py-3">{{ presentacion.codigo }}</td>
-                            <td class="px-4 py-3">{{ presentacion.producto.nombre }} - {{ presentacion.valor }} {{ presentacion.categoria_unidad.unidad_medida.nombre }}</td>
+                            <td class="px-4 py-3">{{ presentacion.producto.nombre }} ({{ presentacion.producto.marca }}) - {{ presentacion.valor }} {{ presentacion.categoria_unidad.unidad_medida.abreviatura }}</td>
                             <td class="px-4 py-3">{{ presentacion.stock }}</td>
                             <td class="px-4 py-3">${{ presentacion.precio_compra }}</td>
                             <form method="post" action="{% url 'agregar_producto_compra' %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="id_presentacion" value="{{ presentacion.id }}">
-                                <td class="px-4 py-3">
+                                <td class="px-2 py-3">
                                     <input type="number" name="cantidad" value="1" min="1" class="w-full px-2 py-1 border border-gray-300 rounded-lg" readonly>
                                 </td>
                                 <td class="px-4 py-3">
@@ -187,40 +216,53 @@
                         <div class="space-y-4">
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700">RIF</label>
-                                <input type="text" name="rif" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                <input type="text" name="rif" id="rif" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required>
+                                <p id="rif-error" class="text-red-500 text-sm hidden">Formato inválido. Ejemplo: V32418434-8</p>
                             </div>
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700">Nombre</label>
-                                <input type="text" name="nombre" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                <input type="text" name="nombre" 
+                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"                     
+                                    pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" 
+                                    oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '')" required>
                             </div>
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700">Teléfono</label>
-                                <input type="text" name="telefono" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                <input type="text" name="telefono" 
+                                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required
+                                    required pattern="\d{11}" title="Debe tener exactamente 11 dígitos">
+                                <p class="text-red-500 text-xs mt-1 hidden" id="errorTelefono">El teléfono debe tener exactamente 11 dígitos.</p>
                             </div>
+                            
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700">Estado</label>
-                                <input type="checkbox" name="estado" class="form-checkbox h-5 w-5 text-blue-600" checked>
-                                <span class="ml-2 text-gray-700">Activo</span>
+                                <input 
+                                    type="checkbox" 
+                                    name="estado" 
+                                    class="form-check-input"
+                                    checked
+                                > Activo
                             </div>
                         </div>
                         <div class="space-y-4">
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700">Dirección</label>
-                                <textarea name="direccion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required></textarea>
+                                <textarea name="direccion" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required></textarea>
                             </div>
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700">Dirección Fiscal</label>
-                                <textarea name="direccion_fiscal" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required></textarea>
+                                <textarea name="direccion_fiscal" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required></textarea>
                             </div>
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700">Productos Ofrecidos</label>
-                                <textarea name="productos_ofrecidos" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                                <textarea name="productos_ofrecidos" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required></textarea>
                             </div>
                         </div>
                     </div>
+                    
                     <div class="flex justify-end mt-6">
-                        <button type="button" onclick="closeModalNuevoProveedor()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-300 mr-2">Cancelar</button>
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">Guardar</button>
+                        <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400 mr-2" onclick="closeModalNuevoProveedor()">Cancelar</button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500">Guardar</button>
                     </div>
                 </form>
             </div>
@@ -251,7 +293,19 @@
                     return null;
                 }
             });
+            document.getElementById("rif").addEventListener("input", function() {
+                let rifInput = this.value.toUpperCase(); 
+                let rifPattern = /^[VEJ]-\d{8}-\d$/; 
+                let errorMessage = document.getElementById("rif-error");
         
+                if (rifPattern.test(rifInput)) {
+                    this.classList.remove("border-red-500");
+                    errorMessage.classList.add("hidden");
+                } else {
+                    this.classList.add("border-red-500");
+                    errorMessage.classList.remove("hidden");
+                }
+            });
 
             let proveedorSeleccionado = localStorage.getItem("proveedorSeleccionado");
             if (proveedorSeleccionado) {
@@ -339,16 +393,26 @@
                     cantidadElement.textContent = data.cantidad;
 
                     let subtotalElement = document.querySelector(`.subtotal[data-id="${id}"]`);
+                    let subtotalBsElement = document.querySelector(`.subtotal-bs[data-id="${id}"]`);
+                    let totalElement = document.querySelector('.total');
+                    let totalBsElement = document.querySelector('.total-bs');
+        
                     if (subtotalElement) {
                         subtotalElement.textContent = `$${data.subtotal.toFixed(2)}`;
                     }
-
-                    let totalElement = document.querySelector('.total');
+                    if (subtotalBsElement) {
+                        subtotalBsElement.textContent = `Bs ${data.subtotal_bs.toFixed(2)}`;
+                    }
                     if (totalElement) {
                         totalElement.textContent = `Total: $${data.total.toFixed(2)}`;
                     }
+                    if (totalBsElement) {
+                        totalBsElement.textContent = `Total: Bs ${data.total_bs.toFixed(2)}`;
+                    }
                 } else {
-                    alert("Error al actualizar la cantidad");
+                    alert(data.error || "Error al actualizar la cantidad");
+        
+                    cantidadElement.textContent = cantidadActual;
                 }
             });
         }

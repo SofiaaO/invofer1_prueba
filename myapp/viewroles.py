@@ -5,17 +5,7 @@ from django.contrib import messages
 from myapp.models import CustomUser
 from django.contrib.auth.forms import UserCreationForm
 
-def crear_grupos():
-    grupos_permisos = {
-        "Administrador": Permission.objects.all(),
-        "Cajero": Permission.objects.filter(codename__in=["view_ventas","add_ventas","view_cliente","add_cliente","change_cliente","view_detalleventas","add_detalleventas","change_detalleventas"]),
-        "Almacen": Permission.objects.filter(codename__in=["view_producto", "add_producto", "change_producto","view_presentacion", "add_presentacion", "change_presentacion","view_unidadmedida","view_marca","view_categoria","view_categoriaunidadmedida"]),
-    }
-    for nombre_grupo, permisos in grupos_permisos.items():
-        grupo, _ = Group.objects.get_or_create(name=nombre_grupo)
-        grupo.permissions.set(permisos)
-    
-    print("Grupos y permisos creados correctamente.")
+
 @login_required
 @permission_required('auth.change_group', raise_exception=True)
 def asignar_roles(request):

@@ -13,10 +13,13 @@ from myapp.viewroles import *
 from myapp.viewsperfil import *
 from myapp.viewsmovimiento import *
 from myapp.viewscompra import *
+from myapp.viewsauditoria import *
+from myapp.viewsmoneda import *
 urlpatterns = [
     path('', login_view, name="login"),
     path('logout/', logout_view, name="logout"),
     path('dashboard/', dashboard, name="dashboard"),
+    path('historial-general/', historial_general, name='historial_general'),
     path('crear_usuario/', crear_usuario, name='crear_usuario'),
     path('crear_grupo/', crear_grupo, name='crear_grupo'),
     path('asignar_roles/', asignar_roles, name='asignar_roles'),
@@ -29,9 +32,13 @@ urlpatterns = [
     path('Proveedores/crear', Crear_Proveedor, name="Crear Proveedor"),
     path('Proveedores/editar/<int:id>/', editar_proveedor, name='Editar Proveedor'),
     path('productos/', listar_productos, name='lista_productos'),
+    path('generar_codigo/<int:producto_id>/', generar_codigo, name='generar_codigo'),
     path('productos/crear/', crear_producto, name="agregar"), 
     path('productos/editar/<int:id>/', editar_producto, name='editar_producto'),
     path('productos/nuevo/', crear_presentacion, name='crear_presentacion'),
+    path('crear-categoria/', crear_categoria, name='crear_categoria'),
+    path('crear-marca/', crear_marca, name='crear_marca'),
+    path('presentaciones/editar/<int:id>/', editar_presentacion, name='editar_presentacion'),
     path('obtener_unidades_por_producto/<int:producto_id>/', obtener_unidades_por_producto, name='obtener_unidades_por_producto'),
     path('listar_presentaciones/', listar_presentaciones, name='listar_presentaciones'),
     path('movimientos/', listar_movimientos, name='listar_movimientos'),
@@ -41,7 +48,6 @@ urlpatterns = [
     path('marcas/<int:id>/', gestionar_marcas, name='Editar Marca'),
     path('unidades/', gestionar_unidades, name='Gestionar Unidades'),
     path('unidades/<int:id>/', gestionar_unidades, name='Editar Unidad'),
-    path('login/', login, name='Login'),
     path('compras/', listar_compras, name='compras_listar'),
     path('compras/nueva/', nueva_compra, name='nueva_compra'),
     path('compras/editar-cantidad/', editar_cantidad, name='editar_cantidad'),
@@ -66,4 +72,8 @@ urlpatterns = [
     path('impuestos/', gestionar_impuestos, name='Gestionar Impuestos'),  
     path('impuestos/<int:id>/', gestionar_impuestos, name='Editar Impuesto'),
     path('impuestos/eliminar/<int:id>/', eliminar_impuesto, name='eliminar_impuesto'),
+    #Urls de las Monedas
+    path('monedas/',listar_tasas_cambio,name="listar_tasa"),
+    path('monedas/crear',crear_tasa_cambio,name="crear_tasa_cambio"),
+    path('editar-tasa/<int:id>/', editar_tasa_cambio, name='editar_tasa_cambio'),
 ]

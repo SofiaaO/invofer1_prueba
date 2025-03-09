@@ -4,16 +4,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import UnidadMedida
 from .forms import UnidadMedidaForm
 from django.db.models import Q
-
+from django.contrib.auth.decorators import login_required
+@login_required
 def gestionar_unidades(request, id=None):
     query = request.GET.get('buscar', '')
-    
-    if query: 
-        unidades_list = UnidadMedida.objects.filter(
+    unidades_list = UnidadMedida.objects.filter(
         Q(nombre__icontains=query) | Q(abreviatura__icontains=query)
-    ).order_by('nombre')  
-    else:
-        unidades_list=UnidadMedida.objects.all().order_by('nombre') 
+    ) if query else UnidadMedida.objects.all()
 
     paginator = Paginator(unidades_list, 5)
     page_number = request.GET.get('page')
