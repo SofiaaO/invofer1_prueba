@@ -6,7 +6,7 @@ services:
     startCommand: "gunicorn mysite.wsgi:application"
     envVars:
       - key: DATABASE_URL
-        value: postgresql://sofia:fNQrMUoEZclc7hgEneLiUHItt2GiyRfT@dpg-cv4suvd6l47c73ar924g-a/invofer_prueba
+        value: postgresql://sofia:WiXSB8fRmvA72BMHxjeaoZB7D225Kgqi@dpg-cv73299c1ekc73di54lg-a/invofer_prueba_7bo7
       - key: SECRET_KEY
         value: django-insecure-1e*e#0+(9@7w)kz$8#r1p^=8r8m00hh)5esht7z2^2a2#mfebf
       - key: DEBUG
